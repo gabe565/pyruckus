@@ -30,7 +30,8 @@ class Ruckus:
 
     def disconnect(self) -> None:
         """Close the SSH session."""
-        self.ssh.close()
+        if self.ssh and self.ssh.isalive():
+            self.ssh.close()
 
     def clients(self) -> dict:
         """Pull active clients from the device."""
