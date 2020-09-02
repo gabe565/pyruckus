@@ -47,7 +47,7 @@ class Ruckus:
         for client in re.split("Clients:", result):
             match = CLIENTS_REGEX.search(client)
             if match:
-                devices[match.group("ip")] = {
+                devices[match.group("mac")] = {
                     "ip": match.group("ip"),
                     "mac": match.group("mac"),
                     "name": match.group("name"),
