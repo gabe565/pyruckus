@@ -1,7 +1,7 @@
 import re
 
 from .RuckusSSH import RuckusSSH
-from .const import CLIENTS_REGEX
+from .const import CLIENTS_REGEX, MESH_NAME_REGEX
 
 
 class Ruckus:
@@ -54,3 +54,21 @@ class Ruckus:
                 }
 
         return devices
+
+    def mesh_name(self):
+        """Pull the current mesh name."""
+        if not self.ssh.isalive():
+            self.connect()
+
+        self.ssh.enable()
+        self.ssh.sendline("show mesh info")
+        self.ssh.prompt()
+
+        result = self.ssh.before.decode("utf-8")
+
+        match = MESH_NAME_REGEX.search(result)
+
+        if match:
+            return match.group("name")
+        else:
+            return "Ruckus Mesh"
