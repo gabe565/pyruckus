@@ -41,10 +41,10 @@ class Ruckus:
         self.ssh.sendline("show current-active-clients all")
         self.ssh.prompt()
 
-        devices_result = self.ssh.before
+        result = self.ssh.before.decode("utf-8")
 
         devices = {}
-        for client in re.split("Clients:", devices_result.decode("utf-8")):
+        for client in re.split("Clients:", result):
             match = CLIENTS_REGEX.search(client)
             if match:
                 devices[match.group("ip")] = {
