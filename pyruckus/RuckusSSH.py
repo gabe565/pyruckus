@@ -13,14 +13,14 @@ class RuckusSSH(spawn):
 
     def __init__(self, timeout=30, maxread=2000, searchwindowsize=None,
                  logfile=None, cwd=None, env=None, ignore_sighup=True, echo=True,
-                 encoding=None, codec_errors='strict', use_poll=False):
+                 encoding=None, codec_errors='strict', use_poll=False) -> None:
 
         spawn.__init__(self, None, timeout=timeout, maxread=maxread,
                        searchwindowsize=searchwindowsize, logfile=logfile,
                        cwd=cwd, env=env, ignore_sighup=ignore_sighup, echo=echo,
                        encoding=encoding, codec_errors=codec_errors, use_poll=use_poll)
 
-    def login(self, host, username=None, password='', login_timeout=10):
+    def login(self, host, username=None, password='', login_timeout=10) -> bool:
         """Takes the host, username, and password, and logs into the Ruckus device."""
         spawn._spawn(self, f"ssh {host}")
 
@@ -49,7 +49,7 @@ class RuckusSSH(spawn):
 
         return True
 
-    def prompt(self, timeout=-1):
+    def prompt(self, timeout=-1) -> int:
         """Wait for prompt and determine the current level of permissions."""
         if timeout == -1:
             timeout = self.timeout
@@ -58,7 +58,7 @@ class RuckusSSH(spawn):
             raise ConnectionError(CONNECT_ERROR_TIMEOUT)
         return i
 
-    def enable(self, force=False):
+    def enable(self, force=False) -> None:
         """Enable privileged commands"""
         cmd = "enable"
         if force:

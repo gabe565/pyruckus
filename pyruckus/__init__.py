@@ -7,7 +7,7 @@ from .const import CLIENTS_REGEX, MESH_NAME_REGEX
 class Ruckus:
     """Class for communicating with the device."""
 
-    def __init__(self, host: str, username: str, password: str, login_timeout=15, timeout=10):
+    def __init__(self, host: str, username: str, password: str, login_timeout=15, timeout=10) -> None:
         """Set runtime configuration."""
         self.host = host
         self.username = username
@@ -18,21 +18,21 @@ class Ruckus:
         self.ssh = None
         self.connect()
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Disconnect on delete."""
         self.disconnect()
 
-    def connect(self):
+    def connect(self) -> None:
         """Create SSH connection and login."""
         ssh = RuckusSSH()
         ssh.login(self.host, username=self.username, password=self.password, login_timeout=self.login_timeout)
         self.ssh = ssh
 
-    def disconnect(self):
+    def disconnect(self) -> None:
         """Close the SSH session."""
         self.ssh.close()
 
-    def clients(self):
+    def clients(self) -> dict:
         """Pull active clients from the device."""
         if not self.ssh.isalive():
             self.connect()
@@ -55,7 +55,7 @@ class Ruckus:
 
         return devices
 
-    def mesh_name(self):
+    def mesh_name(self) -> str:
         """Pull the current mesh name."""
         if not self.ssh.isalive():
             self.connect()
