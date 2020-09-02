@@ -20,9 +20,9 @@ class RuckusSSH(spawn):
                        cwd=cwd, env=env, ignore_sighup=ignore_sighup, echo=echo,
                        encoding=encoding, codec_errors=codec_errors, use_poll=use_poll)
 
-    def login(self, server, username=None, password='', login_timeout=10):
-        """Takes the server, username, and password, and logs into the Ruckus device."""
-        spawn._spawn(self, f"ssh {server}")
+    def login(self, host, username=None, password='', login_timeout=10):
+        """Takes the host, username, and password, and logs into the Ruckus device."""
+        spawn._spawn(self, f"ssh {host}")
 
         login_regex_array = ["Please login: ", "(?i)are you sure you want to continue connecting", EOF, TIMEOUT]
 

@@ -7,9 +7,9 @@ from .const import CLIENTS_REGEX
 class Ruckus:
     """Class for communicating with the device."""
 
-    def __init__(self, server: str, username: str, password: str, login_timeout=15, timeout=10):
+    def __init__(self, host: str, username: str, password: str, login_timeout=15, timeout=10):
         """Set runtime configuration."""
-        self.server = server
+        self.host = host
         self.username = username
         self.password = password
         self.login_timeout = login_timeout
@@ -25,7 +25,7 @@ class Ruckus:
     def connect(self):
         """Create SSH connection and login."""
         ssh = RuckusSSH()
-        ssh.login(self.server, username=self.username, password=self.password, login_timeout=self.login_timeout)
+        ssh.login(self.host, username=self.username, password=self.password, login_timeout=self.login_timeout)
         self.ssh = ssh
 
     def disconnect(self):

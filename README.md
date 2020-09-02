@@ -14,7 +14,7 @@ pip3 install pyruckus
 
 ```python
 >>> from pyruckus import Ruckus
->>> ruckus = Ruckus("server", "username", "password")
+>>> ruckus = Ruckus("host", "username", "password")
 >>> ruckus.clients()
 ```
 

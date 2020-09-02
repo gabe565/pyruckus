@@ -1,12 +1,12 @@
 import pytest
 
 from pyruckus import Ruckus
-from .const import SERVER, USERNAME, PASSWORD
+from .const import HOST, USERNAME, PASSWORD
 
 
 @pytest.fixture
 def ruckus():
-    return Ruckus(SERVER, USERNAME, PASSWORD)
+    return Ruckus(HOST, USERNAME, PASSWORD)
 
 
 def test_connect_success(ruckus):
