@@ -38,11 +38,7 @@ class Ruckus:
         if not self.ssh.isalive():
             self.connect()
 
-        self.ssh.enable()
-        self.ssh.sendline("show current-active-clients all")
-        self.ssh.prompt()
-
-        result = self.ssh.before.decode("utf-8")
+        result = self.ssh.run_privileged("show current-active-clients all")
 
         devices = {}
         for client in re.split("Clients:", result):
@@ -61,11 +57,7 @@ class Ruckus:
         if not self.ssh.isalive():
             self.connect()
 
-        self.ssh.enable()
-        self.ssh.sendline("show mesh info")
-        self.ssh.prompt()
-
-        result = self.ssh.before.decode("utf-8")
+        result = self.ssh.run_privileged("show mesh info")
 
         match = MESH_NAME_REGEX.search(result)
 

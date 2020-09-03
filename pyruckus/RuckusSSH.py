@@ -49,6 +49,14 @@ class RuckusSSH(spawn):
 
         return True
 
+    def run_privileged(self, cmd: str) -> str:
+        self.enable()
+        self.sendline(cmd)
+        self.prompt()
+        result = self.before.decode("utf-8")
+        self.disable()
+        return result
+
     def prompt(self, timeout=-1) -> int:
         """Wait for prompt and determine the current level of permissions."""
         if timeout == -1:
@@ -65,4 +73,8 @@ class RuckusSSH(spawn):
             cmd += " force"
 
         self.sendline(cmd)
+        self.prompt()
+
+    def disable(self) -> None:
+        self.sendline("disable")
         self.prompt()
