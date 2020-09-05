@@ -53,7 +53,7 @@ class RuckusSSH(spawn):
         self.enable()
         self.sendline(cmd)
         self.prompt()
-        result = self.before.decode("utf-8")
+        result = self.before
         self.disable()
         return result
 

@@ -24,7 +24,7 @@ class Ruckus:
 
     def connect(self) -> None:
         """Create SSH connection and login."""
-        ssh = RuckusSSH()
+        ssh = RuckusSSH(encoding="utf-8")
         ssh.login(self.host, username=self.username, password=self.password, login_timeout=self.login_timeout)
         self.ssh = ssh
 
