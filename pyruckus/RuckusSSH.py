@@ -1,11 +1,7 @@
 from pexpect import spawn, TIMEOUT, EOF
 
 from .const import CONNECT_ERROR_EOF, CONNECT_ERROR_TIMEOUT, LOGIN_ERROR_LOGIN_INCORRECT
-
-
-class LoginError(Exception):
-    """Invalid login."""
-    pass
+from .exceptions import AuthenticationError
 
 
 class RuckusSSH(spawn):
@@ -45,7 +41,7 @@ class RuckusSSH(spawn):
 
         i = self.expect(["> ", "Login incorrect"])
         if i == 1:
-            raise LoginError(LOGIN_ERROR_LOGIN_INCORRECT)
+            raise AuthenticationError(LOGIN_ERROR_LOGIN_INCORRECT)
 
         return True
 
