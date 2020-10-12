@@ -1,7 +1,4 @@
-import re
-
 from .RuckusSSH import RuckusSSH
-from .const import CLIENTS_REGEX
 
 
 class Ruckus:
@@ -39,18 +36,11 @@ class Ruckus:
             self.connect()
 
         result = self.ssh.run_privileged("show current-active-clients all")
+        result, _, _ = result.partition("Last 300 Events/Activities:")
 
-        devices = {}
-        for client in re.split("Clients:", result):
-            match = CLIENTS_REGEX.search(client)
-            if match:
-                devices[match.group("mac")] = {
-                    "ip_address": match.group("ip"),
-                    "mac": match.group("mac"),
-                    "name": match.group("name"),
-                }
+        result = self.__parse_kv(result)
 
-        return devices
+        return {e['Mac Address']: e for e in result['Current Active Clients']['Clients']}
 
     def mesh_name(self) -> str:
         """Pull the current mesh name."""
@@ -116,15 +106,5 @@ class Ruckus:
             self.connect()
 
         result = self.ssh.run_privileged("show sysinfo")
-
-        return self.__parse_kv(result)
-
-    def current_active_clients(self) -> dict:
-        """Pull the current active clients."""
-        if not self.ssh.isalive():
-            self.connect()
-
-        result = self.ssh.run_privileged("show current-active-clients all")
-        result, _, _ = result.partition("Last 300 Events/Activities:")
 
         return self.__parse_kv(result)
