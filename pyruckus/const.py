@@ -13,4 +13,3 @@ CLIENTS_REGEX = re.compile(
     r"IP= (?P<ip>([0-9]{1,3}[\.]){3}[0-9]{1,3})",
     re.DOTALL,
 )
-MESH_NAME_REGEX = re.compile(r"Mesh Name\(ESSID\)= (?P<name>([^\r]+)?)")
