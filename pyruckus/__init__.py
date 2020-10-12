@@ -1,7 +1,7 @@
 import re
 
 from .RuckusSSH import RuckusSSH
-from .const import CLIENTS_REGEX, MESH_NAME_REGEX
+from .const import CLIENTS_REGEX
 
 
 class Ruckus:
