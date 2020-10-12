@@ -1,6 +1,7 @@
 from pexpect import spawn, TIMEOUT, EOF
 
-from .const import CONNECT_ERROR_EOF, CONNECT_ERROR_TIMEOUT, LOGIN_ERROR_LOGIN_INCORRECT
+from .const import CONNECT_ERROR_EOF, CONNECT_ERROR_TIMEOUT, LOGIN_ERROR_LOGIN_INCORRECT, \
+    CONNECT_ERROR_PRIVILEGED_ALREADY_LOGGED_IN
 from .exceptions import AuthenticationError
 
 
@@ -58,10 +59,16 @@ class RuckusSSH(spawn):
         """Wait for prompt and determine the current level of permissions."""
         if timeout == -1:
             timeout = self.timeout
-        i = self.expect(["ruckus> ", "ruckus# ", EOF, TIMEOUT], timeout=timeout)
+        i = self.expect(
+            ["ruckus> ", "ruckus# ", "A privileged user is already logged in", EOF, TIMEOUT],
+            timeout=timeout
+        )
         if i == 2:
-            raise ConnectionError(CONNECT_ERROR_EOF)
+            self.prompt(timeout)
+            raise ConnectionError(CONNECT_ERROR_PRIVILEGED_ALREADY_LOGGED_IN)
         if i == 3:
+            raise ConnectionError(CONNECT_ERROR_EOF)
+        if i == 4:
             raise ConnectionError(CONNECT_ERROR_TIMEOUT)
         return i
 
