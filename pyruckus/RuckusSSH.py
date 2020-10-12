@@ -48,6 +48,7 @@ class RuckusSSH(spawn):
     def run_privileged(self, cmd: str) -> str:
         self.enable()
         self.sendline(cmd)
+        self.expect("\n")
         self.prompt()
         result = self.before
         self.disable()
