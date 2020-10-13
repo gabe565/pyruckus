@@ -80,7 +80,7 @@ class Ruckus:
 
                 breadcrumbs.append(node)
             else:
-                key, _, value = line.partition("= ")
+                key, _, value = line.partition("=")
                 if key:
                     node[key.strip()] = value.strip()
 
