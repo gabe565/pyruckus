@@ -115,3 +115,12 @@ class Ruckus:
         result = self.ssh.run_privileged("show sysinfo")
 
         return self.__parse_kv(result)
+
+    def ap_info(self) -> dict:
+        """Pull info about current access points."""
+        if not self.ssh.isalive():
+            self.connect()
+
+        result = self.ssh.run_privileged("show ap all")
+
+        return self.__parse_kv(result)
