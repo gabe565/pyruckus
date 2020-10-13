@@ -7,7 +7,7 @@ with open("README.md", "r") as file:
 
 setup(
     name="pyruckus",
-    version="0.11.1",
+    version="0.11.2",
     description="Python API to interact with a Ruckus Unleashed device.",
     long_description=long_description,
     long_description_content_type="text/markdown",
