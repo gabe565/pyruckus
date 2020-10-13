@@ -15,7 +15,10 @@ setup(
     author="Gabe Cook",
     author_email="gabe565@gmail.com",
     license="MIT",
-    install_requires=["pexpect>=4.0"],
+    install_requires=[
+        "pexpect>=4.0",
+        "python-slugify>=4.0.1",
+    ],
     packages=["pyruckus"],
     zip_safe=True,
     python_requires=">=3.6",

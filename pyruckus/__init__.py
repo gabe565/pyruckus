@@ -1,3 +1,5 @@
+from slugify import slugify
+
 from .RuckusSSH import RuckusSSH
 
 
@@ -33,7 +35,7 @@ class Ruckus:
     def mesh_name(self) -> str:
         """Pull the current mesh name."""
         try:
-            return self.mesh_info()['Mesh Settings']['Mesh Name(ESSID)']
+            return self.mesh_info()['mesh_settings']['mesh_name_essid']
         except KeyError:
             return 'Ruckus Mesh'
 
@@ -64,7 +66,7 @@ class Ruckus:
 
             if is_header:
                 # Remove colon, then strip whitespace
-                line = line[:-1].strip()
+                line = slugify(line[:-1], separator="_")
                 parent_node = breadcrumbs[-1]
                 node = {}
 
@@ -81,8 +83,10 @@ class Ruckus:
                 breadcrumbs.append(node)
             else:
                 key, _, value = line.partition("=")
+                key = slugify(key, separator="_")
+                value = value.strip()
                 if key:
-                    node[key.strip()] = value.strip()
+                    node[key] = value
 
         return root
 
