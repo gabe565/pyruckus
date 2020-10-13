@@ -52,44 +52,51 @@ class Ruckus:
     @staticmethod
     def __parse_kv(response) -> dict:
         """Parse Ruckus nested key-value output into a dict."""
-        result = {}
+        root = {}
         indent = 0
 
-        node = result
-        parent_node = result
+        node = root
+        breadcrumbs = [root]
         for line in response.splitlines():
-            if not line:
+            # Skip empty lines
+            if not line.strip():
                 continue
 
-            if line.endswith(":") and "= " not in line:
-                line = line.rstrip(":")
-                stripped_line = line.lstrip()
+            # Line is a "header" instead of a key-value pair
+            is_header = line.endswith(":") and "= " not in line
 
-                last_indent = indent
-                indent = len(line) - len(stripped_line)
+            prev_indent = indent
+            indent = len(line) - len(line.lstrip())
 
-                new_node = {}
-                if indent > last_indent:
-                    parent_node = node
-                elif indent < last_indent:
-                    parent_node = result
+            # If the indent has decreased, remove nodes from the breadcrumbs
+            if indent < prev_indent:
+                difference = int((indent - prev_indent) / 2)
+                breadcrumbs = breadcrumbs[:difference]
+                node = breadcrumbs[-1]
 
-                if stripped_line in parent_node:
-                    if isinstance(parent_node[stripped_line], list):
-                        parent_node[stripped_line].append(new_node)
+            if is_header:
+                # Remove colon, then strip whitespace
+                line = line[:-1].strip()
+                parent_node = breadcrumbs[-1]
+                node = {}
+
+                # If current header already exists, convert to list
+                if line in parent_node:
+                    if isinstance(parent_node[line], list):
+                        parent_node[line].append(node)
                     else:
-                        last_node = parent_node[stripped_line]
-                        parent_node[stripped_line] = [last_node, new_node]
+                        prev_node = parent_node[line]
+                        parent_node[line] = [prev_node, node]
                 else:
-                    parent_node[stripped_line] = new_node
+                    parent_node[line] = node
 
-                node = new_node
+                breadcrumbs.append(node)
             else:
                 key, _, value = line.partition("= ")
                 if key and value:
                     node[key.strip()] = value.strip()
 
-        return result
+        return root
 
     def mesh_info(self) -> dict:
         """Pull the current mesh name."""
