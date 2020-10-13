@@ -93,7 +93,7 @@ class Ruckus:
                 breadcrumbs.append(node)
             else:
                 key, _, value = line.partition("= ")
-                if key and value:
+                if key:
                     node[key.strip()] = value.strip()
 
         return root
