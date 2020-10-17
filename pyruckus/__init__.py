@@ -20,6 +20,12 @@ class Ruckus:
         """Disconnect on delete."""
         self.disconnect()
 
+    @staticmethod
+    async def create(host: str, username: str, password: str, login_timeout=15, timeout=10):
+        ruckus = Ruckus(host, username, password, login_timeout=login_timeout, timeout=timeout)
+        await ruckus.connect()
+        return ruckus
+
     async def connect(self) -> None:
         """Create SSH connection and login."""
         ssh = RuckusSSH(encoding="utf-8")
