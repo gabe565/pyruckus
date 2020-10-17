@@ -17,7 +17,7 @@ class RuckusSSH(spawn):
                        cwd=cwd, env=env, ignore_sighup=ignore_sighup, echo=echo,
                        encoding=encoding, codec_errors=codec_errors, use_poll=use_poll)
 
-    async def login(self, host, username=None, password='', login_timeout=10) -> bool:
+    async def login(self, host: str, username=None, password='', login_timeout=10) -> bool:
         """Takes the host, username, and password, and logs into the Ruckus device."""
         spawn._spawn(self, f"ssh {host}")
 
