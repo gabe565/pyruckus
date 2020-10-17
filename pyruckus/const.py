@@ -1,5 +1,4 @@
 """Constants used in pyruckus."""
-import re
 
 # Error strings
 CONNECT_ERROR_EOF = "Could not establish connection to host"
