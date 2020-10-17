@@ -17,19 +17,19 @@ class RuckusSSH(spawn):
                        cwd=cwd, env=env, ignore_sighup=ignore_sighup, echo=echo,
                        encoding=encoding, codec_errors=codec_errors, use_poll=use_poll)
 
-    def login(self, host, username=None, password='', login_timeout=10) -> bool:
+    async def login(self, host, username=None, password='', login_timeout=10) -> bool:
         """Takes the host, username, and password, and logs into the Ruckus device."""
         spawn._spawn(self, f"ssh {host}")
 
         login_regex_array = ["Please login: ", "(?i)are you sure you want to continue connecting", EOF, TIMEOUT]
 
-        i = self.expect(login_regex_array, timeout=login_timeout)
+        i = await self.expect(login_regex_array, timeout=login_timeout, async_=True)
         if i == 1:
             # New certificate -- always accept it.
             # This is what you get if SSH does not have the remote host's
             # public key stored in the 'known_hosts' cache.
             self.sendline("yes")
-            i = self.expect(login_regex_array, timeout=login_timeout)
+            i = await self.expect(login_regex_array, timeout=login_timeout, async_=True)
         if i == 2:
             raise ConnectionError(CONNECT_ERROR_EOF)
         if i == 3:
@@ -37,34 +37,35 @@ class RuckusSSH(spawn):
 
         self.sendline(username)
 
-        self.expect("Password: ")
+        await self.expect("Password: ", async_=True)
         self.sendline(password)
 
-        i = self.expect(["> ", "Login incorrect"])
+        i = await self.expect(["> ", "Login incorrect"], async_=True)
         if i == 1:
             raise AuthenticationError(LOGIN_ERROR_LOGIN_INCORRECT)
 
         return True
 
-    def run_privileged(self, cmd: str) -> str:
-        self.enable()
+    async def run_privileged(self, cmd: str) -> str:
+        await self.enable()
         self.sendline(cmd)
-        self.expect("\n")
-        self.prompt()
+        await self.expect("\n", async_=True)
+        await self.prompt()
         result = self.before
-        self.disable()
+        await self.disable()
         return result
 
-    def prompt(self, timeout=-1) -> int:
+    async def prompt(self, timeout=-1) -> int:
         """Wait for prompt and determine the current level of permissions."""
         if timeout == -1:
             timeout = self.timeout
-        i = self.expect(
+        i = await self.expect(
             ["ruckus> ", "ruckus# ", "A privileged user is already logged in", EOF, TIMEOUT],
-            timeout=timeout
+            timeout=timeout,
+            async_=True
         )
         if i == 2:
-            self.prompt(timeout)
+            await self.prompt(timeout)
             raise ConnectionError(CONNECT_ERROR_PRIVILEGED_ALREADY_LOGGED_IN)
         if i == 3:
             raise ConnectionError(CONNECT_ERROR_EOF)
@@ -72,15 +73,15 @@ class RuckusSSH(spawn):
             raise ConnectionError(CONNECT_ERROR_TIMEOUT)
         return i
 
-    def enable(self, force=False) -> None:
+    async def enable(self, force=False) -> None:
         """Enable privileged commands"""
         cmd = "enable"
         if force:
             cmd += " force"
 
         self.sendline(cmd)
-        self.prompt()
+        await self.prompt()
 
-    def disable(self) -> None:
+    async def disable(self) -> None:
         self.sendline("disable")
-        self.prompt()
+        await self.prompt()

@@ -15,29 +15,21 @@ class Ruckus:
         self.timeout = timeout
 
         self.ssh = None
-        self.connect()
 
     def __del__(self) -> None:
         """Disconnect on delete."""
         self.disconnect()
 
-    def connect(self) -> None:
+    async def connect(self) -> None:
         """Create SSH connection and login."""
         ssh = RuckusSSH(encoding="utf-8")
-        ssh.login(self.host, username=self.username, password=self.password, login_timeout=self.login_timeout)
+        await ssh.login(self.host, username=self.username, password=self.password, login_timeout=self.login_timeout)
         self.ssh = ssh
 
     def disconnect(self) -> None:
         """Close the SSH session."""
         if self.ssh and self.ssh.isalive():
             self.ssh.close()
-
-    def mesh_name(self) -> str:
-        """Pull the current mesh name."""
-        try:
-            return self.mesh_info()['mesh_settings']['mesh_name_essid']
-        except KeyError:
-            return 'Ruckus Mesh'
 
     @staticmethod
     def __parse_kv(response) -> dict:
@@ -90,39 +82,47 @@ class Ruckus:
 
         return root
 
-    def mesh_info(self) -> dict:
+    async def mesh_info(self) -> dict:
         """Pull the current mesh name."""
         if not self.ssh.isalive():
-            self.connect()
+            await self.connect()
 
-        result = self.ssh.run_privileged("show mesh info")
+        result = await self.ssh.run_privileged("show mesh info")
 
         return self.__parse_kv(result)
 
-    def system_info(self) -> dict:
+    async def mesh_name(self) -> str:
+        """Pull the current mesh name."""
+        try:
+            mesh_info = await self.mesh_info()
+            return mesh_info['mesh_settings']['mesh_name_essid']
+        except KeyError:
+            return 'Ruckus Mesh'
+
+    async def system_info(self) -> dict:
         """Pull the system info."""
         if not self.ssh.isalive():
-            self.connect()
+            await self.connect()
 
-        result = self.ssh.run_privileged("show sysinfo")
+        result = await self.ssh.run_privileged("show sysinfo")
 
         return self.__parse_kv(result)
 
-    def current_active_clients(self) -> dict:
+    async def current_active_clients(self) -> dict:
         """Pull active clients from the device."""
         if not self.ssh.isalive():
-            self.connect()
+            await self.connect()
 
-        result = self.ssh.run_privileged("show current-active-clients all")
+        result = await self.ssh.run_privileged("show current-active-clients all")
         result, _, _ = result.partition("Last 300 Events/Activities:")
 
         return self.__parse_kv(result)
 
-    def ap_info(self) -> dict:
+    async def ap_info(self) -> dict:
         """Pull info about current access points."""
         if not self.ssh.isalive():
-            self.connect()
+            await self.connect()
 
-        result = self.ssh.run_privileged("show ap all")
+        result = await self.ssh.run_privileged("show ap all")
 
         return self.__parse_kv(result)
