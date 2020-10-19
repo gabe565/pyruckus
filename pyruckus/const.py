@@ -18,4 +18,5 @@ CMD_AP_INFO = "show ap all"
 # Other
 MESH_SETTINGS = "mesh_settings"
 MESH_NAME_ESSID = "mesh_name_essid"
+SERIAL_NUMBER = "serial_number"
 HEADER_300_EVENTS = "Last 300 Events/Activities:"

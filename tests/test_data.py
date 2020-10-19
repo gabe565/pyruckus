@@ -23,7 +23,6 @@ async def test_mesh_info():
     mesh_info = await ruckus.mesh_info()
     assert mesh_info['mesh_settings']['mesh_status']
     assert mesh_info['mesh_settings']['mesh_name_essid']
-    assert mesh_info['mesh_settings']['mesh_hop_detection']['status']
     assert mesh_info['zero_touch_mesh_pre_approved_serial_number_list']['serial_number']
 
 

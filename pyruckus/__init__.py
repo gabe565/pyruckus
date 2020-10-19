@@ -1,8 +1,7 @@
 """The main pyruckus API class."""
-from slugify import slugify
-
 from .const import CMD_SYSTEM_INFO, CMD_CURRENT_ACTIVE_CLIENTS, CMD_AP_INFO, HEADER_300_EVENTS, \
     CMD_MESH_INFO, MESH_SETTINGS, MESH_NAME_ESSID
+from .response_parser import parse_ruckus_key_value
 from .RuckusSSH import RuckusSSH
 
 
@@ -47,57 +46,6 @@ class Ruckus:
         if self.ssh and self.ssh.isalive():
             self.ssh.close()
 
-    @staticmethod
-    def __parse_kv(response) -> dict:
-        """Parse Ruckus nested key-value output into a dict."""
-        root = {}
-        indent = 0
-
-        node = root
-        breadcrumbs = [root]
-        for line in response.splitlines():
-            # Skip empty lines
-            if not line.strip():
-                continue
-
-            # Line is a "header" instead of a key-value pair
-            is_header = line.endswith(":") and "= " not in line
-
-            prev_indent = indent
-            indent = len(line) - len(line.lstrip())
-
-            # If the indent has decreased, remove nodes from the breadcrumbs
-            if indent < prev_indent:
-                difference = int((indent - prev_indent) / 2)
-                breadcrumbs = breadcrumbs[:difference]
-                node = breadcrumbs[-1]
-
-            if is_header:
-                # Remove colon, then strip whitespace
-                line = slugify(line[:-1], separator="_")
-                parent_node = breadcrumbs[-1]
-                node = {}
-
-                # If current header already exists, convert to list
-                if line in parent_node:
-                    if isinstance(parent_node[line], list):
-                        parent_node[line].append(node)
-                    else:
-                        prev_node = parent_node[line]
-                        parent_node[line] = [prev_node, node]
-                else:
-                    parent_node[line] = node
-
-                breadcrumbs.append(node)
-            else:
-                key, _, value = line.partition("=")
-                key = slugify(key, separator="_")
-                value = value.strip()
-                if key:
-                    node[key] = value
-
-        return root
-
     async def ensure_connected(self) -> bool:
         """Make sure we are connected to SSH. Reconnects if disconnected."""
         if self.ssh and self.ssh.isalive():
@@ -109,7 +57,7 @@ class Ruckus:
         """Pull the current mesh name."""
         await self.ensure_connected()
         result = await self.ssh.run_privileged(CMD_MESH_INFO)
-        return self.__parse_kv(result)
+        return parse_ruckus_key_value(result)
 
     async def mesh_name(self) -> str:
         """Pull the current mesh name."""
@@ -123,17 +71,17 @@ class Ruckus:
         """Pull the system info."""
         await self.ensure_connected()
         result = await self.ssh.run_privileged(CMD_SYSTEM_INFO)
-        return self.__parse_kv(result)
+        return parse_ruckus_key_value(result)
 
     async def current_active_clients(self) -> dict:
         """Pull active clients from the device."""
         await self.ensure_connected()
         result = await self.ssh.run_privileged(CMD_CURRENT_ACTIVE_CLIENTS)
         result, _, _ = result.partition(HEADER_300_EVENTS)
-        return self.__parse_kv(result)
+        return parse_ruckus_key_value(result)
 
     async def ap_info(self) -> dict:
         """Pull info about current access points."""
         await self.ensure_connected()
         result = await self.ssh.run_privileged(CMD_AP_INFO)
-        return self.__parse_kv(result)
+        return parse_ruckus_key_value(result)
