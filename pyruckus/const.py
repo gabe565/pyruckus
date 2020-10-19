@@ -14,6 +14,8 @@ CMD_MESH_INFO = "show mesh info"
 CMD_SYSTEM_INFO = "show sysinfo"
 CMD_CURRENT_ACTIVE_CLIENTS = "show current-active-clients all"
 CMD_AP_INFO = "show ap all"
+CMD_CONFIG = "show config"
+CMD_WLAN = "show wlan all"
 
 # Other
 MESH_SETTINGS = "mesh_settings"

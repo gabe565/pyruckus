@@ -1,6 +1,6 @@
 """The main pyruckus API class."""
-from .const import CMD_SYSTEM_INFO, CMD_CURRENT_ACTIVE_CLIENTS, CMD_AP_INFO, HEADER_300_EVENTS, \
-    CMD_MESH_INFO, MESH_SETTINGS, MESH_NAME_ESSID
+from .const import CMD_SYSTEM_INFO, CMD_CURRENT_ACTIVE_CLIENTS, CMD_AP_INFO, CMD_CONFIG, HEADER_300_EVENTS, \
+    CMD_MESH_INFO, MESH_SETTINGS, MESH_NAME_ESSID, CMD_WLAN
 from .response_parser import parse_ruckus_key_value
 from .RuckusSSH import RuckusSSH
 
@@ -84,3 +84,11 @@ class Ruckus:
     async def ap_info(self) -> dict:
         """Pull info about current access points."""
         return await self.run_and_parse(CMD_AP_INFO)
+
+    async def config(self) -> dict:
+        """Pull all config info. WARNING: this one is slow."""
+        return await self.run_and_parse(CMD_CONFIG)
+
+    async def wlan_info(self) -> dict:
+        """Pull WLAN info."""
+        return await self.run_and_parse(CMD_WLAN)
