@@ -46,7 +46,7 @@ class Ruckus:
 
     async def connect(self) -> bool:
         """Create SSH connection and login."""
-        ssh = RuckusSSH(encoding="utf-8")
+        ssh = RuckusSSH()
         result = await ssh.login(
             self.host,
             username=self.username,

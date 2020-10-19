@@ -19,32 +19,16 @@ class RuckusSSH(spawn):
     def __init__(
         self,
         timeout=30,
-        maxread=2000,
-        searchwindowsize=None,
-        logfile=None,
-        cwd=None,
-        env=None,
         ignore_sighup=True,
-        echo=True,
-        encoding=None,
-        codec_errors="strict",
-        use_poll=False,
+        encoding="utf-8",
     ) -> None:
 
         spawn.__init__(
             self,
             None,
             timeout=timeout,
-            maxread=maxread,
-            searchwindowsize=searchwindowsize,
-            logfile=logfile,
-            cwd=cwd,
-            env=env,
             ignore_sighup=ignore_sighup,
-            echo=echo,
             encoding=encoding,
-            codec_errors=codec_errors,
-            use_poll=use_poll,
         )
 
     async def login(
