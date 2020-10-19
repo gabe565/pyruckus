@@ -46,12 +46,17 @@ class RuckusSSH(spawn):
 
         return True
 
-    async def run_privileged(self, cmd: str) -> str:
-        await self.enable()
+    async def run(self, cmd: str) -> str:
+        """Runs a command."""
         self.sendline(cmd)
         await self.expect("\n", async_=True)
         await self.prompt()
-        result = self.before
+        return self.before
+
+    async def run_privileged(self, cmd: str) -> str:
+        """Runs a privileged command."""
+        await self.enable()
+        result = await self.run(cmd)
         await self.disable()
         return result
 
