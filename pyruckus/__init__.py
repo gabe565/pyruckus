@@ -53,11 +53,17 @@ class Ruckus:
         else:
             return await self.connect()
 
+    async def run_and_parse(self, cmd: str, partition=None) -> dict:
+        """Run a command and parse the response."""
+        await self.ensure_connected()
+        result = await self.ssh.run_privileged(cmd)
+        if partition:
+            result = result.partition(partition)[0]
+        return parse_ruckus_key_value(result)
+
     async def mesh_info(self) -> dict:
         """Pull the current mesh name."""
-        await self.ensure_connected()
-        result = await self.ssh.run_privileged(CMD_MESH_INFO)
-        return parse_ruckus_key_value(result)
+        return await self.run_and_parse(CMD_MESH_INFO)
 
     async def mesh_name(self) -> str:
         """Pull the current mesh name."""
@@ -69,19 +75,12 @@ class Ruckus:
 
     async def system_info(self) -> dict:
         """Pull the system info."""
-        await self.ensure_connected()
-        result = await self.ssh.run_privileged(CMD_SYSTEM_INFO)
-        return parse_ruckus_key_value(result)
+        return await self.run_and_parse(CMD_SYSTEM_INFO)
 
     async def current_active_clients(self) -> dict:
         """Pull active clients from the device."""
-        await self.ensure_connected()
-        result = await self.ssh.run_privileged(CMD_CURRENT_ACTIVE_CLIENTS)
-        result, _, _ = result.partition(HEADER_300_EVENTS)
-        return parse_ruckus_key_value(result)
+        return await self.run_and_parse(CMD_CURRENT_ACTIVE_CLIENTS, partition=HEADER_300_EVENTS)
 
     async def ap_info(self) -> dict:
         """Pull info about current access points."""
-        await self.ensure_connected()
-        result = await self.ssh.run_privileged(CMD_AP_INFO)
-        return parse_ruckus_key_value(result)
+        return await self.run_and_parse(CMD_AP_INFO)
