@@ -28,11 +28,17 @@ class Ruckus:
         await ruckus.connect()
         return ruckus
 
-    async def connect(self) -> None:
+    async def connect(self) -> bool:
         """Create SSH connection and login."""
         ssh = RuckusSSH(encoding="utf-8")
-        await ssh.login(self.host, username=self.username, password=self.password, login_timeout=self.login_timeout)
+        result = await ssh.login(
+            self.host,
+            username=self.username,
+            password=self.password,
+            login_timeout=self.login_timeout,
+        )
         self.ssh = ssh
+        return result
 
     def disconnect(self) -> None:
         """Close the SSH session."""
@@ -90,10 +96,16 @@ class Ruckus:
 
         return root
 
+    async def ensure_connected(self) -> bool:
+        """Make sure we are connected to SSH. Reconnects if disconnected."""
+        if self.ssh and self.ssh.isalive():
+            return True
+        else:
+            return await self.connect()
+
     async def mesh_info(self) -> dict:
         """Pull the current mesh name."""
-        if not self.ssh.isalive():
-            await self.connect()
+        await self.ensure_connected()
 
         result = await self.ssh.run_privileged("show mesh info")
 
@@ -109,8 +121,7 @@ class Ruckus:
 
     async def system_info(self) -> dict:
         """Pull the system info."""
-        if not self.ssh.isalive():
-            await self.connect()
+        await self.ensure_connected()
 
         result = await self.ssh.run_privileged("show sysinfo")
 
@@ -118,8 +129,7 @@ class Ruckus:
 
     async def current_active_clients(self) -> dict:
         """Pull active clients from the device."""
-        if not self.ssh.isalive():
-            await self.connect()
+        await self.ensure_connected()
 
         result = await self.ssh.run_privileged("show current-active-clients all")
         result, _, _ = result.partition("Last 300 Events/Activities:")
@@ -128,8 +138,7 @@ class Ruckus:
 
     async def ap_info(self) -> dict:
         """Pull info about current access points."""
-        if not self.ssh.isalive():
-            await self.connect()
+        await self.ensure_connected()
 
         result = await self.ssh.run_privileged("show ap all")
 
