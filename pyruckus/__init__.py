@@ -24,7 +24,7 @@ class Ruckus:
         self.disconnect()
 
     @staticmethod
-    async def create(host: str, username: str, password: str, login_timeout=15, timeout=10):
+    async def create(host: str, username: str, password: str, login_timeout=15, timeout=10) -> "Ruckus":
         """Create a new Ruckus object and connect."""
         ruckus = Ruckus(host, username, password, login_timeout=login_timeout, timeout=timeout)
         await ruckus.connect()
