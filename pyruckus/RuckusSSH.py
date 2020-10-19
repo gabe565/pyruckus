@@ -1,3 +1,4 @@
+"""Ruckus SSH client."""
 from pexpect import spawn, TIMEOUT, EOF
 
 from .const import CONNECT_ERROR_EOF, CONNECT_ERROR_TIMEOUT, LOGIN_ERROR_LOGIN_INCORRECT, \
@@ -18,7 +19,7 @@ class RuckusSSH(spawn):
                        encoding=encoding, codec_errors=codec_errors, use_poll=use_poll)
 
     async def login(self, host: str, username=None, password='', login_timeout=10) -> bool:
-        """Takes the host, username, and password, and logs into the Ruckus device."""
+        """Logs into the Ruckus device."""
         spawn._spawn(self, f"ssh {host}")
 
         login_regex_array = ["Please login: ", "(?i)are you sure you want to continue connecting", EOF, TIMEOUT]
@@ -79,7 +80,7 @@ class RuckusSSH(spawn):
         return i
 
     async def enable(self, force=False) -> None:
-        """Enable privileged commands"""
+        """Enable privileged commands."""
         cmd = "enable"
         if force:
             cmd += " force"
@@ -88,5 +89,6 @@ class RuckusSSH(spawn):
         await self.prompt()
 
     async def disable(self) -> None:
+        """Disable privileged commands."""
         self.sendline("disable")
         await self.prompt()

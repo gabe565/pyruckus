@@ -1,3 +1,4 @@
+"""The main pyruckus API class."""
 from slugify import slugify
 
 from .RuckusSSH import RuckusSSH
@@ -22,6 +23,7 @@ class Ruckus:
 
     @staticmethod
     async def create(host: str, username: str, password: str, login_timeout=15, timeout=10):
+        """Create a new Ruckus object and connect."""
         ruckus = Ruckus(host, username, password, login_timeout=login_timeout, timeout=timeout)
         await ruckus.connect()
         return ruckus
