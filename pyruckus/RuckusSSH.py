@@ -2,7 +2,7 @@
 from pexpect import spawn, TIMEOUT, EOF
 
 from .const import CONNECT_ERROR_EOF, CONNECT_ERROR_TIMEOUT, LOGIN_ERROR_LOGIN_INCORRECT, \
-    CONNECT_ERROR_PRIVILEGED_ALREADY_LOGGED_IN
+    CONNECT_ERROR_PRIVILEGED_ALREADY_LOGGED_IN, CMD_ENABLE, CMD_ENABLE_FORCE, CMD_DISABLE
 from .exceptions import AuthenticationError
 
 
@@ -81,14 +81,15 @@ class RuckusSSH(spawn):
 
     async def enable(self, force=False) -> None:
         """Enable privileged commands."""
-        cmd = "enable"
         if force:
-            cmd += " force"
+            cmd = f"{CMD_ENABLE} {CMD_ENABLE_FORCE}"
+        else:
+            cmd = CMD_ENABLE
 
         self.sendline(cmd)
         await self.prompt()
 
     async def disable(self) -> None:
         """Disable privileged commands."""
-        self.sendline("disable")
+        self.sendline(CMD_DISABLE)
         await self.prompt()

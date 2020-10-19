@@ -1,6 +1,8 @@
 """The main pyruckus API class."""
 from slugify import slugify
 
+from .const import CMD_SYSTEM_INFO, CMD_CURRENT_ACTIVE_CLIENTS, CMD_AP_INFO, HEADER_300_EVENTS, \
+    CMD_MESH_INFO, MESH_SETTINGS, MESH_NAME_ESSID
 from .RuckusSSH import RuckusSSH
 
 
@@ -106,40 +108,32 @@ class Ruckus:
     async def mesh_info(self) -> dict:
         """Pull the current mesh name."""
         await self.ensure_connected()
-
-        result = await self.ssh.run_privileged("show mesh info")
-
+        result = await self.ssh.run_privileged(CMD_MESH_INFO)
         return self.__parse_kv(result)
 
     async def mesh_name(self) -> str:
         """Pull the current mesh name."""
         try:
             mesh_info = await self.mesh_info()
-            return mesh_info['mesh_settings']['mesh_name_essid']
+            return mesh_info[MESH_SETTINGS][MESH_NAME_ESSID]
         except KeyError:
             return 'Ruckus Mesh'
 
     async def system_info(self) -> dict:
         """Pull the system info."""
         await self.ensure_connected()
-
-        result = await self.ssh.run_privileged("show sysinfo")
-
+        result = await self.ssh.run_privileged(CMD_SYSTEM_INFO)
         return self.__parse_kv(result)
 
     async def current_active_clients(self) -> dict:
         """Pull active clients from the device."""
         await self.ensure_connected()
-
-        result = await self.ssh.run_privileged("show current-active-clients all")
-        result, _, _ = result.partition("Last 300 Events/Activities:")
-
+        result = await self.ssh.run_privileged(CMD_CURRENT_ACTIVE_CLIENTS)
+        result, _, _ = result.partition(HEADER_300_EVENTS)
         return self.__parse_kv(result)
 
     async def ap_info(self) -> dict:
         """Pull info about current access points."""
         await self.ensure_connected()
-
-        result = await self.ssh.run_privileged("show ap all")
-
+        result = await self.ssh.run_privileged(CMD_AP_INFO)
         return self.__parse_kv(result)
