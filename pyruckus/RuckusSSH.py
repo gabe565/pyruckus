@@ -1,28 +1,64 @@
 """Ruckus SSH client."""
 from pexpect import spawn, TIMEOUT, EOF
 
-from .const import CONNECT_ERROR_EOF, CONNECT_ERROR_TIMEOUT, LOGIN_ERROR_LOGIN_INCORRECT, \
-    CONNECT_ERROR_PRIVILEGED_ALREADY_LOGGED_IN, CMD_ENABLE, CMD_ENABLE_FORCE, CMD_DISABLE
+from .const import (
+    CONNECT_ERROR_EOF,
+    CONNECT_ERROR_TIMEOUT,
+    LOGIN_ERROR_LOGIN_INCORRECT,
+    CONNECT_ERROR_PRIVILEGED_ALREADY_LOGGED_IN,
+    CMD_ENABLE,
+    CMD_ENABLE_FORCE,
+    CMD_DISABLE,
+)
 from .exceptions import AuthenticationError
 
 
 class RuckusSSH(spawn):
     """Ruckus SSH client."""
 
-    def __init__(self, timeout=30, maxread=2000, searchwindowsize=None,
-                 logfile=None, cwd=None, env=None, ignore_sighup=True, echo=True,
-                 encoding=None, codec_errors='strict', use_poll=False) -> None:
+    def __init__(
+        self,
+        timeout=30,
+        maxread=2000,
+        searchwindowsize=None,
+        logfile=None,
+        cwd=None,
+        env=None,
+        ignore_sighup=True,
+        echo=True,
+        encoding=None,
+        codec_errors="strict",
+        use_poll=False,
+    ) -> None:
 
-        spawn.__init__(self, None, timeout=timeout, maxread=maxread,
-                       searchwindowsize=searchwindowsize, logfile=logfile,
-                       cwd=cwd, env=env, ignore_sighup=ignore_sighup, echo=echo,
-                       encoding=encoding, codec_errors=codec_errors, use_poll=use_poll)
+        spawn.__init__(
+            self,
+            None,
+            timeout=timeout,
+            maxread=maxread,
+            searchwindowsize=searchwindowsize,
+            logfile=logfile,
+            cwd=cwd,
+            env=env,
+            ignore_sighup=ignore_sighup,
+            echo=echo,
+            encoding=encoding,
+            codec_errors=codec_errors,
+            use_poll=use_poll,
+        )
 
-    async def login(self, host: str, username=None, password='', login_timeout=10) -> bool:
+    async def login(
+        self, host: str, username=None, password="", login_timeout=10
+    ) -> bool:
         """Logs into the Ruckus device."""
         spawn._spawn(self, f"ssh {host}")
 
-        login_regex_array = ["Please login: ", "(?i)are you sure you want to continue connecting", EOF, TIMEOUT]
+        login_regex_array = [
+            "Please login: ",
+            "(?i)are you sure you want to continue connecting",
+            EOF,
+            TIMEOUT,
+        ]
 
         i = await self.expect(login_regex_array, timeout=login_timeout, async_=True)
         if i == 1:
@@ -66,9 +102,15 @@ class RuckusSSH(spawn):
         if timeout == -1:
             timeout = self.timeout
         i = await self.expect(
-            ["ruckus> ", "ruckus# ", "A privileged user is already logged in", EOF, TIMEOUT],
+            [
+                "ruckus> ",
+                "ruckus# ",
+                "A privileged user is already logged in",
+                EOF,
+                TIMEOUT,
+            ],
             timeout=timeout,
-            async_=True
+            async_=True,
         )
         if i == 2:
             await self.prompt(timeout)

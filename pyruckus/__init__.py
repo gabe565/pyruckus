@@ -1,6 +1,15 @@
 """The main pyruckus API class."""
-from .const import CMD_SYSTEM_INFO, CMD_CURRENT_ACTIVE_CLIENTS, CMD_AP_INFO, CMD_CONFIG, HEADER_300_EVENTS, \
-    CMD_MESH_INFO, MESH_SETTINGS, MESH_NAME_ESSID, CMD_WLAN
+from .const import (
+    CMD_SYSTEM_INFO,
+    CMD_CURRENT_ACTIVE_CLIENTS,
+    CMD_AP_INFO,
+    CMD_CONFIG,
+    HEADER_300_EVENTS,
+    CMD_MESH_INFO,
+    MESH_SETTINGS,
+    MESH_NAME_ESSID,
+    CMD_WLAN,
+)
 from .response_parser import parse_ruckus_key_value
 from .RuckusSSH import RuckusSSH
 
@@ -8,7 +17,9 @@ from .RuckusSSH import RuckusSSH
 class Ruckus:
     """Class for communicating with the device."""
 
-    def __init__(self, host: str, username: str, password: str, login_timeout=15, timeout=10) -> None:
+    def __init__(
+        self, host: str, username: str, password: str, login_timeout=15, timeout=10
+    ) -> None:
         """Set runtime configuration."""
         self.host = host
         self.username = username
@@ -23,9 +34,13 @@ class Ruckus:
         self.disconnect()
 
     @staticmethod
-    async def create(host: str, username: str, password: str, login_timeout=15, timeout=10) -> "Ruckus":
+    async def create(
+        host: str, username: str, password: str, login_timeout=15, timeout=10
+    ) -> "Ruckus":
         """Create a new Ruckus object and connect."""
-        ruckus = Ruckus(host, username, password, login_timeout=login_timeout, timeout=timeout)
+        ruckus = Ruckus(
+            host, username, password, login_timeout=login_timeout, timeout=timeout
+        )
         await ruckus.connect()
         return ruckus
 
@@ -71,7 +86,7 @@ class Ruckus:
             mesh_info = await self.mesh_info()
             return mesh_info[MESH_SETTINGS][MESH_NAME_ESSID]
         except KeyError:
-            return 'Ruckus Mesh'
+            return "Ruckus Mesh"
 
     async def system_info(self) -> dict:
         """Pull the system info."""
@@ -79,7 +94,9 @@ class Ruckus:
 
     async def current_active_clients(self) -> dict:
         """Pull active clients from the device."""
-        return await self.run_and_parse(CMD_CURRENT_ACTIVE_CLIENTS, partition=HEADER_300_EVENTS)
+        return await self.run_and_parse(
+            CMD_CURRENT_ACTIVE_CLIENTS, partition=HEADER_300_EVENTS
+        )
 
     async def ap_info(self) -> dict:
         """Pull info about current access points."""

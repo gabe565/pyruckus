@@ -45,7 +45,9 @@ def parse_ruckus_key_value(response) -> dict:
 
         # If the indent has decreased, remove nodes from the breadcrumbs
         i = None
-        if indent < prev_indent or (is_header and prev_is_header and indent == prev_indent):
+        if indent < prev_indent or (
+            is_header and prev_is_header and indent == prev_indent
+        ):
             while i != indent and len(breadcrumbs) > 1:
                 i, node = breadcrumbs.popitem()
 

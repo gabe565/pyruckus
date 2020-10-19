@@ -15,14 +15,14 @@ async def test_connect_success():
 async def test_authentication_error():
     """Test that AuthenticationError is thrown on invalid login."""
     with pytest.raises(AuthenticationError):
-        await connect_ruckus(password='bad-pass')
+        await connect_ruckus(password="bad-pass")
 
 
 @pytest.mark.asyncio
 async def test_invalid_host():
     """Test that ConnectionError is thrown on invalid host."""
     with pytest.raises(ConnectionError):
-        await connect_ruckus(host='127.0.0.1')
+        await connect_ruckus(host="127.0.0.1")
 
 
 @pytest.mark.asyncio
