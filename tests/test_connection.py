@@ -1,3 +1,4 @@
+"""Test connecting to a device and issuing commands."""
 import pytest
 
 from pyruckus.exceptions import AuthenticationError

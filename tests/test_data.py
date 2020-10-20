@@ -1,3 +1,4 @@
+"""Test data returned from a device."""
 import pytest
 
 from tests import connect_ruckus

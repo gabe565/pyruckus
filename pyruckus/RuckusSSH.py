@@ -22,7 +22,7 @@ class RuckusSSH(spawn):
         ignore_sighup=True,
         encoding="utf-8",
     ) -> None:
-
+        """Ruckus SSH client constructor."""
         spawn.__init__(
             self,
             None,
@@ -34,7 +34,7 @@ class RuckusSSH(spawn):
     async def login(
         self, host: str, username=None, password="", login_timeout=10
     ) -> bool:
-        """Logs into the Ruckus device."""
+        """Log into the Ruckus device."""
         spawn._spawn(self, f"ssh {host}")
 
         login_regex_array = [
@@ -68,14 +68,14 @@ class RuckusSSH(spawn):
         return True
 
     async def run(self, cmd: str) -> str:
-        """Runs a command."""
+        """Run a command."""
         self.sendline(cmd)
         await self.expect("\n", async_=True)
         await self.prompt()
         return self.before
 
     async def run_privileged(self, cmd: str) -> str:
-        """Runs a privileged command."""
+        """Run a privileged command."""
         await self.enable()
         result = await self.run(cmd)
         await self.disable()

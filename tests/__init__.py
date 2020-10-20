@@ -9,4 +9,5 @@ PASSWORD = environ.get("RUCKUS_PASSWORD")
 
 
 async def connect_ruckus(host=HOST, username=USERNAME, password=PASSWORD):
+    """Connect to a ruckus device with configured values."""
     return await Ruckus.create(host, username, password)

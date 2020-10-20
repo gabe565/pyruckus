@@ -1,3 +1,4 @@
+"""Utility methods to parse a formatted Ruckus response into a dict."""
 from collections import OrderedDict
 
 from slugify import slugify
@@ -6,6 +7,7 @@ from pyruckus.const import SERIAL_NUMBER
 
 
 def format_ruckus_value(value, force_str=False):
+    """Format a string value into None, int, or bool if possible."""
     value = value.strip()
 
     if not value:
