@@ -4,7 +4,7 @@ from .const import (
     CMD_CURRENT_ACTIVE_CLIENTS,
     CMD_AP_INFO,
     CMD_CONFIG,
-    HEADER_300_EVENTS,
+    HEADER_LAST_EVENTS,
     CMD_MESH_INFO,
     MESH_SETTINGS,
     MESH_NAME_ESSID,
@@ -95,7 +95,7 @@ class Ruckus:
     async def current_active_clients(self) -> dict:
         """Pull active clients from the device."""
         return await self.run_and_parse(
-            CMD_CURRENT_ACTIVE_CLIENTS, partition=HEADER_300_EVENTS
+            CMD_CURRENT_ACTIVE_CLIENTS, partition=HEADER_LAST_EVENTS
         )
 
     async def ap_info(self) -> dict:
