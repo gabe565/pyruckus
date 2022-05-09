@@ -35,7 +35,7 @@ class RuckusSSH(spawn):
         self, host: str, username=None, password="", login_timeout=10
     ) -> bool:
         """Log into the Ruckus device."""
-        spawn._spawn(self, f"ssh {host}")
+        spawn._spawn(self, f"ssh -oHostKeyAlgorithms=+ssh-rsa {host}")
 
         login_regex_array = [
             "Please login: ",
