@@ -30,6 +30,7 @@ class RuckusSSH(spawn):
             ignore_sighup=ignore_sighup,
             encoding=encoding,
         )
+        self.delaybeforesend = None
 
     async def login(
         self, host: str, username=None, password="", login_timeout=10
