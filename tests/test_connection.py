@@ -20,10 +20,10 @@ async def test_authentication_error():
 
 
 @pytest.mark.asyncio
-async def test_invalid_host():
+async def test_connection_error():
     """Test that ConnectionError is thrown on invalid host."""
     with pytest.raises(ConnectionError):
-        await connect_ruckus(host="127.0.0.1")
+        await connect_ruckus(host="127.0.0.1 -p 22222")
 
 
 @pytest.mark.asyncio

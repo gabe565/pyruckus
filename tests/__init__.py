@@ -3,9 +3,9 @@ from os import environ
 
 from pyruckus import Ruckus
 
-HOST = environ.get("RUCKUS_HOST")
-USERNAME = environ.get("RUCKUS_USERNAME")
-PASSWORD = environ.get("RUCKUS_PASSWORD")
+HOST = environ.get("RUCKUS_HOST", "127.0.0.1 -p 2222")
+USERNAME = environ.get("RUCKUS_USERNAME", "user")
+PASSWORD = environ.get("RUCKUS_PASSWORD", "pass")
 
 
 async def connect_ruckus(host=HOST, username=USERNAME, password=PASSWORD):
