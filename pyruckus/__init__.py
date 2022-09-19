@@ -18,10 +18,17 @@ class Ruckus:
     """Class for communicating with the device."""
 
     def __init__(
-        self, host: str, username: str, password: str, login_timeout=15, timeout=10
+        self,
+        host: str,
+        username: str,
+        password: str,
+        port=22,
+        login_timeout=15,
+        timeout=10,
     ) -> None:
         """Set runtime configuration."""
         self.host = host
+        self.port = port
         self.username = username
         self.password = password
         self.login_timeout = login_timeout
@@ -35,11 +42,16 @@ class Ruckus:
 
     @staticmethod
     async def create(
-        host: str, username: str, password: str, login_timeout=15, timeout=10
+        host: str, username: str, password: str, port=22, login_timeout=15, timeout=10
     ) -> "Ruckus":
         """Create a new Ruckus object and connect."""
         ruckus = Ruckus(
-            host, username, password, login_timeout=login_timeout, timeout=timeout
+            host,
+            username,
+            password,
+            port=port,
+            login_timeout=login_timeout,
+            timeout=timeout,
         )
         await ruckus.connect()
         return ruckus
@@ -49,6 +61,7 @@ class Ruckus:
         ssh = RuckusSSH()
         result = await ssh.login(
             self.host,
+            self.port,
             username=self.username,
             password=self.password,
             login_timeout=self.login_timeout,

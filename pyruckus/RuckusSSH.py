@@ -33,10 +33,10 @@ class RuckusSSH(spawn):
         self.delaybeforesend = None
 
     async def login(
-        self, host: str, username=None, password="", login_timeout=10
+        self, host: str, port: int, username=None, password="", login_timeout=10
     ) -> bool:
         """Log into the Ruckus device."""
-        spawn._spawn(self, f"ssh -oHostKeyAlgorithms=+ssh-rsa {host}")
+        spawn._spawn(self, f"ssh -oHostKeyAlgorithms=+ssh-rsa {host} -p {port}")
 
         login_regex_array = [
             "Please login: ",
