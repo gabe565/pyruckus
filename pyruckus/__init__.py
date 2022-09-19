@@ -1,14 +1,14 @@
 """The main pyruckus API class."""
 from .const import (
-    CMD_SYSTEM_INFO,
-    CMD_CURRENT_ACTIVE_CLIENTS,
     CMD_AP_INFO,
     CMD_CONFIG,
-    HEADER_LAST_EVENTS,
+    CMD_CURRENT_ACTIVE_CLIENTS,
     CMD_MESH_INFO,
-    MESH_SETTINGS,
-    MESH_NAME_ESSID,
+    CMD_SYSTEM_INFO,
     CMD_WLAN,
+    HEADER_LAST_EVENTS,
+    MESH_NAME_ESSID,
+    MESH_SETTINGS,
 )
 from .response_parser import parse_ruckus_key_value
 from .RuckusSSH import RuckusSSH

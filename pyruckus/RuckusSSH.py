@@ -1,14 +1,14 @@
 """Ruckus SSH client."""
-from pexpect import spawn, TIMEOUT, EOF
+from pexpect import EOF, TIMEOUT, spawn
 
 from .const import (
-    CONNECT_ERROR_EOF,
-    CONNECT_ERROR_TIMEOUT,
-    LOGIN_ERROR_LOGIN_INCORRECT,
-    CONNECT_ERROR_PRIVILEGED_ALREADY_LOGGED_IN,
+    CMD_DISABLE,
     CMD_ENABLE,
     CMD_ENABLE_FORCE,
-    CMD_DISABLE,
+    CONNECT_ERROR_EOF,
+    CONNECT_ERROR_PRIVILEGED_ALREADY_LOGGED_IN,
+    CONNECT_ERROR_TIMEOUT,
+    LOGIN_ERROR_LOGIN_INCORRECT,
 )
 from .exceptions import AuthenticationError
 
