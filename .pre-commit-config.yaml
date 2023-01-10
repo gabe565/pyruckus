@@ -20,7 +20,7 @@ repos:
           - --format=custom
           - --configfile=tests/bandit.yaml
   - repo: https://github.com/PyCQA/isort
-    rev: 5.10.1
+    rev: 5.11.4
     hooks:
       - id: isort
   - repo: https://github.com/pre-commit/mirrors-prettier
