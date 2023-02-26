@@ -16,8 +16,8 @@ setup(
     author_email="gabe565@gmail.com",
     license="MIT",
     install_requires=[
-        "pexpect>=4.0",
-        "python-slugify>=4.0.1",
+        "requests>=2.27.1",
+        "xmltodict>=0.13.0"
     ],
     packages=["pyruckus"],
     zip_safe=True,

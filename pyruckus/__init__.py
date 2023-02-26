@@ -1,18 +1,15 @@
 """The main pyruckus API class."""
 from .const import (
-    CMD_AP_INFO,
-    CMD_CONFIG,
-    CMD_CURRENT_ACTIVE_CLIENTS,
-    CMD_MESH_INFO,
-    CMD_SYSTEM_INFO,
-    CMD_WLAN,
-    HEADER_LAST_EVENTS,
-    MESH_NAME_ESSID,
-    MESH_SETTINGS,
+    CONF_MESHLIST_GETCONF,
+    CMDSTAT_SYSTEM_GETSTAT_PREFIX,
+    CMDSTAT_SYSTEM_GETSTAT_POSTFIX,
+    CMDSTAT_CLIENTLIST_GETSTAT,
+    CMDSTAT_APLIST_GETSTAT,
+    CMDSTAT_WLANLIST_GETSTAT,
 )
-from .response_parser import parse_ruckus_key_value
-from .RuckusSSH import RuckusSSH
-
+from .const import SystemStat as SystemStat
+from .RuckusAjax import RuckusAjax
+from warnings import warn
 
 class Ruckus:
     """Class for communicating with the device."""
@@ -22,103 +19,74 @@ class Ruckus:
         host: str,
         username: str,
         password: str,
-        port=22,
-        login_timeout=15,
-        timeout=10,
     ) -> None:
-        """Set runtime configuration."""
         self.host = host
-        self.port = port
         self.username = username
         self.password = password
-        self.login_timeout = login_timeout
-        self.timeout = timeout
-
-        self.ssh = None
+        self.session = None
 
     def __del__(self) -> None:
         """Disconnect on delete."""
         self.disconnect()
 
     @staticmethod
-    async def create(
-        host: str, username: str, password: str, port=22, login_timeout=15, timeout=10
-    ) -> "Ruckus":
+    async def create(host: str, username: str, password: str) -> "Ruckus":
         """Create a new Ruckus object and connect."""
-        ruckus = Ruckus(
-            host,
-            username,
-            password,
-            port=port,
-            login_timeout=login_timeout,
-            timeout=timeout,
-        )
+        ruckus = Ruckus(host, username, password)
         await ruckus.connect()
         return ruckus
 
-    async def connect(self) -> bool:
-        """Create SSH connection and login."""
-        ssh = RuckusSSH()
-        result = await ssh.login(
-            self.host,
-            self.port,
-            username=self.username,
-            password=self.password,
-            login_timeout=self.login_timeout,
-        )
-        self.ssh = ssh
-        return result
+    async def connect(self) -> None:
+        """Create connection and login."""
+        session = RuckusAjax(self.host, username=self.username, password=self.password)
+        await session.login()
+        self.session = session
 
     def disconnect(self) -> None:
-        """Close the SSH session."""
-        if self.ssh and self.ssh.isalive():
-            self.ssh.close()
+        """Close the session."""
+        if self.session:
+            self.session.close()
 
-    async def ensure_connected(self) -> bool:
-        """Make sure we are connected to SSH. Reconnects if disconnected."""
-        if self.ssh and self.ssh.isalive():
-            return True
-        else:
-            return await self.connect()
+    async def get_mesh_info(self) -> dict:
+        meshinfo = await self.session.conf(CONF_MESHLIST_GETCONF)
+        return meshinfo["mesh-list"]["mesh"]
 
-    async def run_and_parse(self, cmd: str, partition=None) -> dict:
-        """Run a command and parse the response."""
-        await self.ensure_connected()
-        result = await self.ssh.run_privileged(cmd)
-        if partition:
-            result = result.partition(partition)[0]
-        return parse_ruckus_key_value(result)
+    async def get_system_info(self, *sections: SystemStat) -> dict:
+        section = ''.join(s.value for s in sections) if sections else SystemStat.DEFAULT.value
+        sysinfo = await self.session.cmd_stat(CMDSTAT_SYSTEM_GETSTAT_PREFIX + section + CMDSTAT_SYSTEM_GETSTAT_POSTFIX)
+        return sysinfo["response"] if  "response" in sysinfo else sysinfo["system"]
 
-    async def mesh_info(self) -> dict:
-        """Pull the current mesh name."""
-        return await self.run_and_parse(CMD_MESH_INFO)
+    async def get_active_client_info(self) -> dict:
+        return await self.session.cmd_stat(CMDSTAT_CLIENTLIST_GETSTAT, "client")
 
-    async def mesh_name(self) -> str:
-        """Pull the current mesh name."""
-        try:
-            mesh_info = await self.mesh_info()
-            return mesh_info[MESH_SETTINGS][MESH_NAME_ESSID]
-        except KeyError:
-            return "Ruckus Mesh"
+    async def get_ap_info(self) -> dict:
+        return await self.session.cmd_stat(CMDSTAT_APLIST_GETSTAT, "ap")
+
+    async def get_wlan_info(self) -> dict:
+        return await self.session.cmd_stat(CMDSTAT_WLANLIST_GETSTAT, "vap")
 
     async def system_info(self) -> dict:
-        """Pull the system info."""
-        return await self.run_and_parse(CMD_SYSTEM_INFO)
+        warn("Use  get_system_info()", DeprecationWarning)
+        sysinfo = await self.get_system_info(SystemStat.SYSINFO, SystemStat.IDENTITY)
+        return { "system_overview": { "name": sysinfo["identity"]["name"], "version": sysinfo["sysinfo"]["version"], "serial_number": sysinfo["sysinfo"]["serial"] } }
+
+    async def mesh_info(self) -> dict:
+        warn("Use get_mesh_info() or et_system_info(SystemStat.MESH_POLICY)", DeprecationWarning)
+        meshinfo = await self.get_mesh_info()
+        meshpolicy = await self.get_system_info(SystemStat.MESH_POLICY)
+        return { "mesh_settings": { "mesh_status": "Enabled" if meshpolicy["mesh-policy"]["enabled"] == "true" else "Disabled", "mesh_name_essid": meshinfo["name"], "zero_touch_mesh_pre_approved_serial_number_list": { "serial_number": "unsupported" } } }
+
+    async def mesh_name(self) -> str:
+        warn("Use get_mesh_info()['name']", DeprecationWarning)
+        mesh_info = await self.get_mesh_info()
+        return mesh_info["name"] if "name" in mesh_info else "Ruckus Mesh"
 
     async def current_active_clients(self) -> dict:
-        """Pull active clients from the device."""
-        return await self.run_and_parse(
-            CMD_CURRENT_ACTIVE_CLIENTS, partition=HEADER_LAST_EVENTS
-        )
+        warn("Use get_active_client_info()", DeprecationWarning)
+        clientstats = await self.get_active_client_info()
+        return { "current_active_clients": { "clients": [{ "mac_address": c["mac"], "host_name": c["hostname"], "user_ip": c["ip"], "access_point": c["vap-mac"] } for c in clientstats ]  } }
 
     async def ap_info(self) -> dict:
-        """Pull info about current access points."""
-        return await self.run_and_parse(CMD_AP_INFO)
-
-    async def config(self) -> dict:
-        """Pull all config info. WARNING: this one is slow."""
-        return await self.run_and_parse(CMD_CONFIG)
-
-    async def wlan_info(self) -> dict:
-        """Pull WLAN info."""
-        return await self.run_and_parse(CMD_WLAN)
+        warn("Use get_ap_info()", DeprecationWarning)
+        apstats = await self.get_ap_info()
+        return { "ap": { "id": { a["id"]: { "mac_address": a["mac"], "device_name": a["devname"], "model": a["model"], "network_setting": { "gateway": a["gateway"] }} for a in apstats }}}

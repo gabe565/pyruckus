@@ -1,2 +1,2 @@
-pexpect>=4.0
-python-slugify>=4.0.1
+requests>=2.27.1
+xmltodict>=0.13.0

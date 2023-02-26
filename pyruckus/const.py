@@ -1,24 +1,27 @@
 """Constants used in pyruckus."""
+from enum import Enum
 
 # Error strings
 CONNECT_ERROR_EOF = "Could not establish connection to host"
 CONNECT_ERROR_TIMEOUT = "Timed out while waiting for client"
-CONNECT_ERROR_PRIVILEGED_ALREADY_LOGGED_IN = "A privileged user is already logged in"
+AJAX_POST_REDIRECTED_ERROR = "Insufficient permission to run this command"
+AJAX_POST_NORESULT_ERROR = "The command was not understood"
 LOGIN_ERROR_LOGIN_INCORRECT = "Login incorrect"
 
-# Commands
-CMD_ENABLE = "enable"
-CMD_ENABLE_FORCE = "force"
-CMD_DISABLE = "disable"
-CMD_MESH_INFO = "show mesh info"
-CMD_SYSTEM_INFO = "show sysinfo"
-CMD_CURRENT_ACTIVE_CLIENTS = "show current-active-clients all"
-CMD_AP_INFO = "show ap all"
-CMD_CONFIG = "show config"
-CMD_WLAN = "show wlan all"
+# ajax payloads
+CMDSTAT_SYSTEM_GETSTAT_PREFIX = "<ajax-request action='getstat' comp='system'>"
+CMDSTAT_SYSTEM_GETSTAT_POSTFIX = "</ajax-request>"
+CONF_MESHLIST_GETCONF= "<ajax-request action='getconf' comp='mesh-list' DECRYPT_X='true'/>"
+CMDSTAT_CLIENTLIST_GETSTAT= "<ajax-request action='getstat' comp='stamgr' enable-gzip='0'><client LEVEL='1' /></ajax-request>"
+CMDSTAT_APLIST_GETSTAT= "<ajax-request action='getstat' comp='stamgr' enable-gzip='0'><ap LEVEL='1' /></ajax-request>"
+CMDSTAT_WLANLIST_GETSTAT= "<ajax-request action='getstat' comp='stamgr' enable-gzip='0' caller='SCI'><vap INTERVAL-STATS='yes' INTERVAL-START='1604710474' INTERVAL-STOP='1605315274' LEVEL='1' /></ajax-request>"
 
-# Other
-MESH_SETTINGS = "mesh_settings"
-MESH_NAME_ESSID = "mesh_name_essid"
-SERIAL_NUMBER = "serial_number"
-HEADER_LAST_EVENTS = "Last 300 Events/Activities:"
+
+class SystemStat(Enum):
+    ALL = ""
+    DEFAULT = "<identity/><sysinfo/><port/>"
+    IDENTITY = "<identity/>"
+    SYSINFO = "<sysinfo/>"
+    PORT = "<port/>"
+    ADMIN = "<admin/>"
+    MESH_POLICY = "<mesh-policy/>"
