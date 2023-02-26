@@ -76,7 +76,7 @@ class RuckusAjax():
             """Ruckus session timed-out. Logging in again."""
             self.session.close()
             self.login()
-            return await self.__ajax_post(cmd, data, retrying = True)
+            return await self.__ajax_post(cmd, data, collection_element, retrying = True)
 
         if not r.text: # if the ajax request payload wasn't understood then we get an empty page back
             raise requests.exceptions.ContentDecodingError(AJAX_POST_NORESULT_ERROR)
