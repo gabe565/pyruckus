@@ -47,9 +47,15 @@ class RuckusAjax():
         h = s.head(self.__login_url, params = { "username": self.username, "password": self.password, "ok": "Log In" }, timeout=3)
         if h.status_code == 200: # if username/password were valid we'd be redirected to the main admin page
             raise AuthenticationError(LOGIN_ERROR_LOGIN_INCORRECT)
-        if "HTTP_X_CSRF_TOKEN" not in h.headers: # if Unleashed is rebuilding then it displays a static page which has no token header
-            raise requests.exceptions.HTTPError(requests.codes['unavailable'])
-        s.headers.update({ "X-CSRF-Token": h.headers["HTTP_X_CSRF_TOKEN"] })
+        if "HTTP_X_CSRF_TOKEN" in h.headers: # newer ZD and Unleashed return CSRF token in header
+            s.headers.update({ "X-CSRF-Token": h.headers["HTTP_X_CSRF_TOKEN"] })
+        else: # older ZD and Unleashed require you to scrape the CSRF token from a page's javascript
+            r = s.get(self.__base_url + "/_csrfTokenVar.jsp")
+            csrf_token = xmltodict.parse(r.text)["script"].split('=').pop()[2:12]
+            if csrf_token:
+                s.headers.update({ "X-CSRF-Token": csrf_token })
+            else: # no token, maybe Unleashed is rebuilding
+                raise requests.exceptions.HTTPError(requests.codes['unavailable'])
 
     async def close(self) -> None:
         if self.session:
