@@ -51,11 +51,10 @@ class RuckusAjax():
             s.headers.update({ "X-CSRF-Token": h.headers["HTTP_X_CSRF_TOKEN"] })
         else: # older ZD and Unleashed require you to scrape the CSRF token from a page's javascript
             r = s.get(self.__base_url + "/_csrfTokenVar.jsp")
-            csrf_token = xmltodict.parse(r.text)["script"].split('=').pop()[2:12]
-            if csrf_token:
-                s.headers.update({ "X-CSRF-Token": csrf_token })
-            else: # no token, maybe Unleashed is rebuilding
+            if r.status_code != 200: # no token page, maybe temporary Unleashed Rebuilding placeholder is showing
                 raise requests.exceptions.HTTPError(requests.codes['unavailable'])
+            csrf_token = xmltodict.parse(r.text)["script"].split('=').pop()[2:12]
+            s.headers.update({ "X-CSRF-Token": csrf_token })
 
     async def close(self) -> None:
         if self.session:
