@@ -1,6 +1,6 @@
 # pyruckus
 
-A Python API which interacts with a Ruckus Unleashed device.
+A Python API which interacts with a Ruckus Unleashed and ZoneDirector devices.
 
 ## Setup
 
