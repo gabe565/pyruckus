@@ -1,6 +1,7 @@
 """Ruckus Ajax client. Using requests because httpx didn't like Ruckus out-of-spec http responses"""
 import requests
 import xmltodict
+from typing import List
 
 from .const import (
     LOGIN_ERROR_LOGIN_INCORRECT, AJAX_POST_NORESULT_ERROR, AJAX_POST_REDIRECTED_ERROR
@@ -56,9 +57,9 @@ class RuckusAjax():
             csrf_token = xmltodict.parse(r.text)["script"].split('=').pop()[2:12]
             s.headers.update({ "X-CSRF-Token": csrf_token })
 
-    async def close(self) -> None:
+    def close(self) -> None:
         if self.session:
-            h = self.session.head(self.__login_url, params = { "logout": "1" }, timeout=3)
+            self.session.head(self.__login_url, params = { "logout": "1" }, timeout=3)
             self.session.close()
 
     def __process_ruckus_ajax_xml(self, path, key, value):
@@ -69,7 +70,7 @@ class RuckusAjax():
         else:
             return key, value
 
-    async def __ajax_post(self, cmd: str, data: str, collection_element: str = None, retrying: bool = False) -> dict:
+    async def __ajax_post(self, cmd: str, data: str, collection_elements: List[str] = None, retrying: bool = False) -> dict:
 
         # request data
         r = self.session.post(cmd, data=data, headers={ "Content-Type": "text/xml" })
@@ -81,15 +82,15 @@ class RuckusAjax():
             """Ruckus session timed-out. Logging in again."""
             self.session.close()
             self.login()
-            return await self.__ajax_post(cmd, data, collection_element, retrying = True)
+            return await self.__ajax_post(cmd, data, collection_elements, retrying = True)
 
         if not r.text: # if the ajax request payload wasn't understood then we get an empty page back
             raise requests.exceptions.ContentDecodingError(AJAX_POST_NORESULT_ERROR)
 
         # convert xml and unwrap collection
-        force_list = None if not collection_element else { collection_element: True }
+        force_list = None if not collection_elements else { ce: True for ce in collection_elements }
         result = xmltodict.parse(r.text, encoding="utf-8", attr_prefix='', postprocessor=self.__process_ruckus_ajax_xml, force_list = force_list)
-        for key in ("ajax-response", "response", "apstamgr-stat", collection_element):
+        for key in ["ajax-response", "response", "apstamgr-stat", "acl-list"] + (collection_elements or []):
             if result and key and key in result:
                 result = result[key]
         return result or []
