@@ -47,7 +47,7 @@ class Ruckus:
     async def get_blocked_info(self) -> List:
         blockedinfo = await self.session.conf("<ajax-request action='getconf' comp='acl-list' updater='page.0.5' />", ["accept", "deny", "acl"])
         denylist = blockedinfo[0]["deny"] if "deny" in blockedinfo[0] else None
-        return [] if not denylist else denylist
+        return [] if not denylist else [d for d in denylist if d]
 
     async def get_system_info(self, *sections: SystemStat) -> dict:
         section = ''.join(s.value for s in sections) if sections else SystemStat.DEFAULT.value
@@ -64,11 +64,11 @@ class Ruckus:
         return await self.session.cmd_stat("<ajax-request action='getstat' comp='stamgr' enable-gzip='0' caller='SCI'><vap INTERVAL-STATS='no' LEVEL='1' /></ajax-request>", ["vap"])
 
     async def do_block_client(self, mac: str) -> None:
-        await self.session.cmd_stat(f"<ajax-request action='docmd' xcmd='block' checkAbility='10' comp='stamgr'><xcmd check-ability='10' tag='client' acl-id='1' client='{mac}' cmd='block'/></ajax-request>")
+        await self.session.cmd_stat(f"<ajax-request action='docmd' xcmd='block' checkAbility='10' comp='stamgr'><xcmd check-ability='10' tag='client' acl-id='1' client='{mac}' cmd='block'><client client='{mac}' acl-id='1' hostname=''></client></xcmd></ajax-request>")
 
     async def do_unblock_client(self, mac: str) -> None:
         blocked = await self.get_blocked_info()
-        remaining = ''.join((f"<deny mac='{deny['mac']}' type='single'/>" for deny in filter(lambda b: (b["mac"] != mac), blocked)))
+        remaining = ''.join((f"<deny mac='{deny['mac']}' type='single'/>" for deny in blocked if deny["mac"] != mac))
         await self.session.conf(f"<ajax-request action='updobj' comp='acl-list' updater='blocked-clients'><acl id='1' name='System' description='System' default-mode='allow' EDITABLE='false'>{remaining}</acl></ajax-request>")
 
     async def system_info(self) -> dict:
