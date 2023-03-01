@@ -2,6 +2,7 @@
 import requests
 import xmltodict
 from typing import List
+from warnings import filterwarnings
 
 from .const import (
     LOGIN_ERROR_LOGIN_INCORRECT, AJAX_POST_NORESULT_ERROR, AJAX_POST_REDIRECTED_ERROR
@@ -28,6 +29,7 @@ class RuckusAjax():
         self.__conf_url = None
 
         self.session = None
+        filterwarnings("ignore", "Unverified HTTPS request.")
 
     async def login(self) -> None:
         """Log into the Ruckus device."""
