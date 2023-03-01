@@ -8,6 +8,7 @@ AJAX_POST_REDIRECTED_ERROR = "Insufficient permission to run this command"
 AJAX_POST_NORESULT_ERROR = "The command was not understood"
 LOGIN_ERROR_LOGIN_INCORRECT = "Login incorrect"
 
+
 class SystemStat(Enum):
     ALL = ""
     DEFAULT = "<identity/><sysinfo/><port/>"

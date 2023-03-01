@@ -4,6 +4,7 @@ from .RuckusAjax import RuckusAjax
 from warnings import warn
 from typing import List
 
+
 class Ruckus:
     """Class for communicating with the device."""
 
@@ -52,7 +53,7 @@ class Ruckus:
     async def get_system_info(self, *sections: SystemStat) -> dict:
         section = ''.join(s.value for s in sections) if sections else SystemStat.DEFAULT.value
         sysinfo = await self.session.cmd_stat(f"<ajax-request action='getstat' comp='system'>{section}</ajax-request>")
-        return sysinfo["response"] if  "response" in sysinfo else sysinfo["system"]
+        return sysinfo["response"] if "response" in sysinfo else sysinfo["system"]
 
     async def get_active_client_info(self) -> List:
         return await self.session.cmd_stat("<ajax-request action='getstat' comp='stamgr' enable-gzip='0'><client LEVEL='1' /></ajax-request>", ["client"])
@@ -80,13 +81,13 @@ class Ruckus:
     async def system_info(self) -> dict:
         warn("Use  get_system_info()", DeprecationWarning)
         sysinfo = await self.get_system_info(SystemStat.SYSINFO, SystemStat.IDENTITY)
-        return { "system_overview": { "name": sysinfo["identity"]["name"], "version": sysinfo["sysinfo"]["version"], "serial_number": sysinfo["sysinfo"]["serial"] } }
+        return {"system_overview": {"name": sysinfo["identity"]["name"], "version": sysinfo["sysinfo"]["version"], "serial_number": sysinfo["sysinfo"]["serial"]}}
 
     async def mesh_info(self) -> dict:
         warn("Use get_mesh_info() or get_system_info(SystemStat.MESH_POLICY)", DeprecationWarning)
         meshinfo = await self.get_mesh_info()
         meshpolicy = await self.get_system_info(SystemStat.MESH_POLICY)
-        return { "mesh_settings": { "mesh_status": "Enabled" if meshpolicy["mesh-policy"]["enabled"] == "true" else "Disabled", "mesh_name_essid": meshinfo["name"], "zero_touch_mesh_pre_approved_serial_number_list": { "serial_number": "unsupported" } } }
+        return {"mesh_settings": {"mesh_status": "Enabled" if meshpolicy["mesh-policy"]["enabled"] == "true" else "Disabled", "mesh_name_essid": meshinfo["name"], "zero_touch_mesh_pre_approved_serial_number_list": {"serial_number": "unsupported"}}}
 
     async def mesh_name(self) -> str:
         warn("Use get_mesh_info()['name']", DeprecationWarning)
@@ -96,9 +97,9 @@ class Ruckus:
     async def current_active_clients(self) -> dict:
         warn("Use get_active_client_info()", DeprecationWarning)
         clientstats = await self.get_active_client_info()
-        return { "current_active_clients": { "clients": [{ "mac_address": c["mac"], "host_name": c["hostname"], "user_ip": c["ip"], "access_point": c["vap-mac"] } for c in clientstats ]  } }
+        return {"current_active_clients": {"clients": [{"mac_address": c["mac"], "host_name": c["hostname"], "user_ip": c["ip"], "access_point": c["vap-mac"]} for c in clientstats]}}
 
     async def ap_info(self) -> dict:
         warn("Use get_ap_info()", DeprecationWarning)
         apstats = await self.get_ap_info()
-        return { "ap": { "id": { a["id"]: { "mac_address": a["mac"], "device_name": a["devname"], "model": a["model"], "network_setting": { "gateway": a["gateway"] }} for a in apstats }}}
+        return {"ap": {"id": {a["id"]: {"mac_address": a["mac"], "device_name": a["devname"], "model": a["model"], "network_setting": {"gateway": a["gateway"]}} for a in apstats}}}
