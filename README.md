@@ -25,7 +25,7 @@ async def test_pyruckus():
     ap_info = await ruckus.ap_info()
     mesh_info = await ruckus.mesh_info()
     system_info = await ruckus.system_info()
-    config = await ruckus.config()
+    # config = await ruckus.config() # not reimplemented
     clients = await ruckus.current_active_clients()
     wlan_info = await ruckus.wlan_info()
 
