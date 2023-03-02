@@ -30,10 +30,14 @@ async def test_pyruckus():
     default_system_info = await ruckus.get_system_info()
     all_system_info = await ruckus.get_system_info(SystemStat.ALL)
     clients = await ruckus.get_active_client_info()
+
     blocked = await ruckus.get_blocked_info()
     await ruckus.do_block_client("60:ab:de:ad:be:ef")
     more_blocked = await ruckus.get_blocked_info()
     await ruckus.do_unblock_client("60:ab:de:ad:be:ef")
+
+    await ruckus.do_hide_ap_leds("24:79:de:ad:be:ef")
+    await ruckus.do_show_ap_leds("24:79:de:ad:be:ef")
 
     ruckus.disconnect()
 

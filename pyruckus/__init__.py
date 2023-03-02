@@ -78,6 +78,17 @@ class Ruckus:
         remaining = ''.join((f"<deny mac='{deny['mac']}' type='single'/>" for deny in blocked if deny["mac"] != mac))
         await self.session.conf(f"<ajax-request action='updobj' comp='acl-list' updater='blocked-clients'><acl id='1' name='System' description='System' default-mode='allow' EDITABLE='false'>{remaining}</acl></ajax-request>")
 
+    async def do_hide_ap_leds(self, mac: str, leds_off: bool = True) -> None:
+        apid = await self.__find_ap_by_mac(mac)
+        if apid:
+            await self.session.conf(f"<ajax-request action='updobj' updater='ap-list.0.5' comp='ap-list'><ap id='{apid}' IS_PARTIAL='true' led-off='{str(leds_off).lower()}' /></ajax-request>")
+
+    async def do_show_ap_leds(self, mac: str) -> None:
+        await self.do_hide_ap_leds(mac, False)
+
+    async def __find_ap_by_mac(self, mac:str) -> str:
+        return next((ap["id"] for ap in await self.get_ap_info() if ap["mac"] == mac), None)
+
     async def system_info(self) -> dict:
         warn("Use  get_system_info()", DeprecationWarning)
         sysinfo = await self.get_system_info(SystemStat.SYSINFO, SystemStat.IDENTITY)
