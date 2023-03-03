@@ -1,6 +1,6 @@
 # pyruckus
 
-A Python API which interacts with a Ruckus Unleashed and ZoneDirector devices.
+A Python API which interacts with Ruckus Unleashed and ZoneDirector devices.
 
 ## Setup
 
@@ -29,11 +29,11 @@ async def test_pyruckus():
     mesh = await ruckus.get_mesh_info()
     default_system_info = await ruckus.get_system_info()
     all_system_info = await ruckus.get_system_info(SystemStat.ALL)
-    clients = await ruckus.get_active_client_info()
-
+    active_clients = await ruckus.get_active_client_info()
+    inactive_clients = await ruckus.get_inactive_client_info() # empty on Unleashed
     blocked = await ruckus.get_blocked_info()
+
     await ruckus.do_block_client("60:ab:de:ad:be:ef")
-    more_blocked = await ruckus.get_blocked_info()
     await ruckus.do_unblock_client("60:ab:de:ad:be:ef")
 
     await ruckus.do_hide_ap_leds("24:79:de:ad:be:ef")

@@ -69,6 +69,10 @@ class RuckusAjax():
             return key[2:], ''.join(chr(ord(letter) - 1) for letter in value)
         elif key == "apstamgr-stat" and not value:  # return an empty array rather than None, for ease of use
             return key, []
+        elif key == "status" and value and value.isnumeric() and path and len(path) > 0 and path[-1][0] == "client":
+             # client status is numeric code for active, and name for inactive. Show name for everything
+            description = "Authorized" if value == "1" else "Authenticating" if value== "2" else "PSK Expired" if value == "3" else "Authorized(Deny)" if value == "4" else "Authorized(Permit)" if value == "5" else "Unauthorized"
+            return key,  description
         else:
             return key, value
 

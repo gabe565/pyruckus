@@ -58,6 +58,9 @@ class Ruckus:
     async def get_active_client_info(self) -> List:
         return await self.session.cmd_stat("<ajax-request action='getstat' comp='stamgr' enable-gzip='0'><client LEVEL='1' /></ajax-request>", ["client"])
 
+    async def get_inactive_client_info(self) -> List:
+        return await self.session.cmd_stat("<ajax-request action='getstat' comp='stamgr' enable-gzip='0'><clientlist period='0' /></ajax-request>", ["client"])
+
     async def get_ap_info(self) -> List:
         return await self.session.cmd_stat("<ajax-request action='getstat' comp='stamgr' enable-gzip='0'><ap LEVEL='1' /></ajax-request>", ["ap"])
 
