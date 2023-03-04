@@ -40,8 +40,8 @@ class RuckusAjax():
         self.session = s
 
         """Locate admin urls"""
-        h = s.head(f"http://{self.host}", timeout=3)
-        self.__login_url = h.headers["Location"].replace("http://", "https://")
+        h = s.head(f"https://{self.host}", timeout=3)
+        self.__login_url = h.headers["Location"]
         self.__base_url = self.__login_url.rsplit('/', 1)[0]
         self.__cmdstat_url = self.__base_url + "/_cmdstat.jsp"
         self.__conf_url = self.__base_url + "/_conf.jsp"
