@@ -96,7 +96,7 @@ class RuckusAjax():
         # convert xml and unwrap collection
         force_list = None if not collection_elements else {ce: True for ce in collection_elements}
         result = xmltodict.parse(r.text, encoding="utf-8", attr_prefix='', postprocessor=self.__process_ruckus_ajax_xml, force_list=force_list)
-        for key in ["ajax-response", "response", "apstamgr-stat", "acl-list"] + (collection_elements or []):
+        for key in ["ajax-response", "response", "apstamgr-stat", "acl-list", "wlansvc-list"] + (collection_elements or []):
             if result and key and key in result:
                 result = result[key]
         return result or []

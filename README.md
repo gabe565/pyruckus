@@ -39,6 +39,9 @@ async def test_pyruckus():
     await ruckus.do_hide_ap_leds("24:79:de:ad:be:ef")
     await ruckus.do_show_ap_leds("24:79:de:ad:be:ef")
 
+    await ruckus.do_disable_wlan("my ssid")
+    await ruckus.do_enable_wlan("my ssid")
+
     ruckus.disconnect()
 
 loop = asyncio.get_event_loop()

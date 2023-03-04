@@ -67,8 +67,11 @@ class Ruckus:
     async def get_ap_group_info(self) -> List:
         return await self.session.cmd_stat("<ajax-request action='getstat' comp='stamgr' enable-gzip='0'><apgroup /></ajax-request>", ["group", "radio", "ap"])
 
-    async def get_wlan_info(self) -> List:
+    async def get_vap_info(self) -> List:
         return await self.session.cmd_stat("<ajax-request action='getstat' comp='stamgr' enable-gzip='0' caller='SCI'><vap INTERVAL-STATS='no' LEVEL='1' /></ajax-request>", ["vap"])
+
+    async def get_wlan_info(self) -> List:
+        return await self.session.conf("<ajax-request action='getconf' DECRYPT_X='true' updater='wlansvc-list.0.5' comp='wlansvc-list'/>", ["wlansvc"])
 
     async def get_wlan_group_info(self) -> List:
         return await self.session.cmd_stat("<ajax-request action='getstat' comp='stamgr' enable-gzip='0' caller='SCI'><wlangroup /></ajax-request>", ["wlangroup", "wlan"])
@@ -81,6 +84,14 @@ class Ruckus:
         remaining = ''.join((f"<deny mac='{deny['mac']}' type='single'/>" for deny in blocked if deny["mac"] != mac))
         await self.session.conf(f"<ajax-request action='updobj' comp='acl-list' updater='blocked-clients'><acl id='1' name='System' description='System' default-mode='allow' EDITABLE='false'>{remaining}</acl></ajax-request>")
 
+    async def do_disable_wlan(self, ssid: str, disable_wlan: bool = True) -> None:
+        wlanid = await self.__find_wlan_by_ssid(ssid)
+        if wlanid:
+            await self.session.conf(f"<ajax-request action='updobj' updater='wlansvc-list.0.5' comp='wlansvc-list'><wlansvc id='{wlanid}' enable-type='{1 if disable_wlan else 0}' IS_PARTIAL='true'/></ajax-request>")
+
+    async def do_enable_wlan(self, ssid: str) -> None:
+        await self.do_disable_wlan(ssid, False)
+
     async def do_hide_ap_leds(self, mac: str, leds_off: bool = True) -> None:
         apid = await self.__find_ap_by_mac(mac)
         if apid:
@@ -92,8 +103,11 @@ class Ruckus:
     async def __find_ap_by_mac(self, mac:str) -> str:
         return next((ap["id"] for ap in await self.get_ap_info() if ap["mac"] == mac), None)
 
+    async def __find_wlan_by_ssid(self, ssid:str) -> str:
+        return next((wlan["id"] for wlan in await self.get_wlan_info() if wlan["ssid"] == ssid), None)
+
     async def system_info(self) -> dict:
-        warn("Use  get_system_info()", DeprecationWarning)
+        warn("Use get_system_info()", DeprecationWarning)
         sysinfo = await self.get_system_info(SystemStat.SYSINFO, SystemStat.IDENTITY)
         return {"system_overview": {"name": sysinfo["identity"]["name"], "version": sysinfo["sysinfo"]["version"], "serial_number": sysinfo["sysinfo"]["serial"]}}
 
