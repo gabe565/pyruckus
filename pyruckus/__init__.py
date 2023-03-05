@@ -45,6 +45,9 @@ class Ruckus:
         meshinfo = await self.session.conf("<ajax-request action='getconf' comp='mesh-list' DECRYPT_X='true'/>")
         return meshinfo["mesh-list"]["mesh"]
 
+    async def get_zerotouch_mesh_info(self) -> dict:
+        return await self.session.conf("<ajax-request action='getconf' updater='ztmeshSerial-list.0.5' comp='ztmeshSerial-list'/>", ["ztmeshSerial"])
+
     async def get_blocked_info(self) -> List:
         blockedinfo = await self.session.conf("<ajax-request action='getconf' comp='acl-list' updater='page.0.5' />", ["accept", "deny", "acl"])
         denylist = blockedinfo[0]["deny"] if "deny" in blockedinfo[0] else None
@@ -100,10 +103,10 @@ class Ruckus:
     async def do_show_ap_leds(self, mac: str) -> None:
         await self.do_hide_ap_leds(mac, False)
 
-    async def __find_ap_by_mac(self, mac:str) -> str:
+    async def __find_ap_by_mac(self, mac: str) -> str:
         return next((ap["id"] for ap in await self.get_ap_info() if ap["mac"] == mac), None)
 
-    async def __find_wlan_by_ssid(self, ssid:str) -> str:
+    async def __find_wlan_by_ssid(self, ssid: str) -> str:
         return next((wlan["id"] for wlan in await self.get_wlan_info() if wlan["ssid"] == ssid), None)
 
     async def system_info(self) -> dict:
@@ -115,7 +118,7 @@ class Ruckus:
         warn("Use get_mesh_info() or get_system_info(SystemStat.MESH_POLICY)", DeprecationWarning)
         meshinfo = await self.get_mesh_info()
         meshpolicy = await self.get_system_info(SystemStat.MESH_POLICY)
-        return {"mesh_settings": {"mesh_status": "Enabled" if meshpolicy["mesh-policy"]["enabled"] == "true" else "Disabled", "mesh_name_essid": meshinfo["name"], "zero_touch_mesh_pre_approved_serial_number_list": {"serial_number": "unsupported"}}}
+        return {"mesh_settings": {"mesh_status": "Enabled" if meshpolicy["mesh-policy"]["enabled"] == "true" else "Disabled", "mesh_name_essid": meshinfo["name"]}, "zero_touch_mesh_pre_approved_serial_number_list": {"serial_number": "unsupported"}}
 
     async def mesh_name(self) -> str:
         warn("Use get_mesh_info()['name']", DeprecationWarning)

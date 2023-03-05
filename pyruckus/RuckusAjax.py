@@ -40,7 +40,10 @@ class RuckusAjax():
         self.session = s
 
         """Locate admin urls"""
-        h = s.head(f"https://{self.host}", timeout=3)
+        try:
+            h = s.head(f"https://{self.host}", timeout=3)
+        except requests.exceptions.ConnectionError as e:
+            raise ConnectionError(e)
         self.__login_url = h.headers["Location"]
         self.__base_url = self.__login_url.rsplit('/', 1)[0]
         self.__cmdstat_url = self.__base_url + "/_cmdstat.jsp"
@@ -54,10 +57,13 @@ class RuckusAjax():
             s.headers.update({"X-CSRF-Token": h.headers["HTTP_X_CSRF_TOKEN"]})
         else:  # older ZD and Unleashed require you to scrape the CSRF token from a page's javascript
             r = s.get(self.__base_url + "/_csrfTokenVar.jsp")
-            if r.status_code != 200:  # no token page, maybe temporary Unleashed Rebuilding placeholder is showing
+            if r.status_code == 200:
+                csrf_token = xmltodict.parse(r.text)["script"].split('=').pop()[2:12]
+                s.headers.update({"X-CSRF-Token": csrf_token})
+            elif r.status_code == 500:  # even older ZD don't use CSRF token at all
+                pass
+            else:  # token page is a redirect, maybe temporary Unleashed Rebuilding placeholder is showing
                 raise requests.exceptions.HTTPError(requests.codes['unavailable'])
-            csrf_token = xmltodict.parse(r.text)["script"].split('=').pop()[2:12]
-            s.headers.update({"X-CSRF-Token": csrf_token})
 
     def close(self) -> None:
         if self.session:
@@ -70,9 +76,9 @@ class RuckusAjax():
         elif key == "apstamgr-stat" and not value:  # return an empty array rather than None, for ease of use
             return key, []
         elif key == "status" and value and value.isnumeric() and path and len(path) > 0 and path[-1][0] == "client":
-             # client status is numeric code for active, and name for inactive. Show name for everything
-            description = "Authorized" if value == "1" else "Authenticating" if value== "2" else "PSK Expired" if value == "3" else "Authorized(Deny)" if value == "4" else "Authorized(Permit)" if value == "5" else "Unauthorized"
-            return key,  description
+            # client status is numeric code for active, and name for inactive. Show name for everything
+            description = "Authorized" if value == "1" else "Authenticating" if value == "2" else "PSK Expired" if value == "3" else "Authorized(Deny)" if value == "4" else "Authorized(Permit)" if value == "5" else "Unauthorized"
+            return key, description
         else:
             return key, value
 
@@ -96,7 +102,8 @@ class RuckusAjax():
         # convert xml and unwrap collection
         force_list = None if not collection_elements else {ce: True for ce in collection_elements}
         result = xmltodict.parse(r.text, encoding="utf-8", attr_prefix='', postprocessor=self.__process_ruckus_ajax_xml, force_list=force_list)
-        for key in ["ajax-response", "response", "apstamgr-stat", "acl-list", "wlansvc-list"] + (collection_elements or []):
+        collection_list = [] if not collection_elements else [f"{ce}-list" for ce in collection_elements] + collection_elements
+        for key in ["ajax-response", "response", "apstamgr-stat"] + collection_list:
             if result and key and key in result:
                 result = result[key]
         return result or []
