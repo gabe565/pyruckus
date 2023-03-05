@@ -1,9 +1,9 @@
 """The main pyruckus API class."""
-from .const import SystemStat as SystemStat
+from .const import SystemStat as SystemStat, VALUE_ERROR_INVALID_MAC
 from .RuckusAjax import RuckusAjax
 from warnings import warn
 from typing import List
-
+from re import match, IGNORECASE
 
 class Ruckus:
     """Class for communicating with the device."""
@@ -80,11 +80,13 @@ class Ruckus:
         return await self.session.cmd_stat("<ajax-request action='getstat' comp='stamgr' enable-gzip='0' caller='SCI'><wlangroup /></ajax-request>", ["wlangroup", "wlan"])
 
     async def do_block_client(self, mac: str) -> None:
-        await self.session.cmd_stat(f"<ajax-request action='docmd' xcmd='block' checkAbility='10' comp='stamgr'><xcmd check-ability='10' tag='client' acl-id='1' client='{mac}' cmd='block'><client client='{mac}' acl-id='1' hostname=''></client></xcmd></ajax-request>")
+        normalized_mac = self.__normalize_mac(mac)
+        await self.session.cmd_stat(f"<ajax-request action='docmd' xcmd='block' checkAbility='10' comp='stamgr'><xcmd check-ability='10' tag='client' acl-id='1' client='{normalized_mac}' cmd='block'><client client='{normalized_mac}' acl-id='1' hostname=''></client></xcmd></ajax-request>")
 
     async def do_unblock_client(self, mac: str) -> None:
+        normalized_mac = self.__normalize_mac(mac)
         blocked = await self.get_blocked_info()
-        remaining = ''.join((f"<deny mac='{deny['mac']}' type='single'/>" for deny in blocked if deny["mac"] != mac))
+        remaining = ''.join((f"<deny mac='{deny['mac']}' type='single'/>" for deny in blocked if deny["mac"] != normalized_mac))
         await self.session.conf(f"<ajax-request action='updobj' comp='acl-list' updater='blocked-clients'><acl id='1' name='System' description='System' default-mode='allow' EDITABLE='false'>{remaining}</acl></ajax-request>")
 
     async def do_disable_wlan(self, ssid: str, disable_wlan: bool = True) -> None:
@@ -96,7 +98,8 @@ class Ruckus:
         await self.do_disable_wlan(ssid, False)
 
     async def do_hide_ap_leds(self, mac: str, leds_off: bool = True) -> None:
-        apid = await self.__find_ap_by_mac(mac)
+        normalized_mac = self.__normalize_mac(mac)
+        apid = await self.__find_ap_by_mac(normalized_mac)
         if apid:
             await self.session.conf(f"<ajax-request action='updobj' updater='ap-list.0.5' comp='ap-list'><ap id='{apid}' IS_PARTIAL='true' led-off='{str(leds_off).lower()}' /></ajax-request>")
 
@@ -105,6 +108,11 @@ class Ruckus:
 
     async def __find_ap_by_mac(self, mac: str) -> str:
         return next((ap["id"] for ap in await self.get_ap_info() if ap["mac"] == mac), None)
+
+    def __normalize_mac(self, mac: str) -> str:
+        if mac and match(r"(?:[0-9a-f]{2}[:-]){5}[0-9a-f]{2}", string=mac, flags=IGNORECASE):
+            return mac.replace('-', ':').lower()
+        raise ValueError(VALUE_ERROR_INVALID_MAC)
 
     async def __find_wlan_by_ssid(self, ssid: str) -> str:
         return next((wlan["id"] for wlan in await self.get_wlan_info() if wlan["ssid"] == ssid), None)

@@ -7,6 +7,7 @@ CONNECT_ERROR_TIMEOUT = "Timed out while waiting for client"
 AJAX_POST_REDIRECTED_ERROR = "Insufficient permission to run this command"
 AJAX_POST_NORESULT_ERROR = "The command was not understood"
 LOGIN_ERROR_LOGIN_INCORRECT = "Login incorrect"
+VALUE_ERROR_INVALID_MAC = "Invalid MAC"
 
 
 class SystemStat(Enum):
