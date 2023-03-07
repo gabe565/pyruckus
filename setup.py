@@ -7,8 +7,8 @@ with open("README.md") as file:
 
 setup(
     name="pyruckus",
-    version="0.16",
-    description="Python API to interact with a Ruckus Unleashed device.",
+    version="0.20",
+    description="Python API to interact with Ruckus Unleashed and ZoneDirector devices.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/gabe565/pyruckus",
@@ -16,10 +16,10 @@ setup(
     author_email="gabe565@gmail.com",
     license="MIT",
     install_requires=[
-        "requests>=2.27.1",
+        "aiohttp>=3.8.4",
         "xmltodict>=0.13.0"
     ],
     packages=["pyruckus"],
     zip_safe=True,
-    python_requires=">=3.6",
+    python_requires=">=3.10",
 )
