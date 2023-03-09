@@ -126,7 +126,7 @@ class Ruckus:
 
         # create aiohttp session if we don't have one
         if not self.session:
-            self.session = aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=10), cookie_jar=aiohttp.CookieJar(unsafe=True))
+            self.session = aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=10), cookie_jar=aiohttp.CookieJar(unsafe=True), connector=aiohttp.TCPConnector(keepalive_timeout=5))
 
         # locate the admin pages: /admin/* for Unleashed and ZD 9.x, /admin10/* for ZD 10.x
         async with self.session.head(f"https://{self.host}", timeout=3, ssl=self.ssl_context, allow_redirects=False) as h:
