@@ -42,5 +42,7 @@ async def test_pyruckus():
         await ruckus.do_disable_wlan("my ssid")
         await ruckus.do_enable_wlan("my ssid")
 
+        await ruckus.do_set_wlan_password("my ssid", "blah>blah<")
+
 asyncio.run(test_pyruckus())
 ```
