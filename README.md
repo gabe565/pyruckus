@@ -12,7 +12,7 @@ pip3 install pyruckus
 
 ## Usage
 
-Each function is defined as an [async](https://docs.python.org/3/library/asyncio.html) [context manager](https://docs.python.org/3/reference/datamodel.html#context-managers), so you will have to create an event loop instead of calling the functions directly in a shell.
+Functions are defined within an [async](https://docs.python.org/3/library/asyncio.html) [context manager](https://docs.python.org/3/reference/datamodel.html#context-managers), so you will have to create an event loop instead of calling the functions directly in a shell.
 
 ```python
 from pyruckus import Ruckus, SystemStat
