@@ -96,8 +96,8 @@ class Ruckus:
                 wpa.set("passphrase", password)
                 wpa.set("x-passphrase", password)
             if wpa.get("sae-passphrase") is not None:
-                wpa.set("sae-passphrase", password)
-                wpa.set("x-sae-passphrase", password)
+                wpa.set("sae-passphrase", sae_password)
+                wpa.set("x-sae-passphrase", sae_password)
             xml_bytes = ET.tostring(wlansvc)
             await self.conf(f"<ajax-request action='updobj' updater='wlan' comp='wlansvc-list'>{xml_bytes.decode('utf-8')}</ajax-request>")
 
