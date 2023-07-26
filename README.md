@@ -2,6 +2,9 @@
 
 A Python API which interacts with a Ruckus Unleashed device.
 
+> **Important**
+> This project is deprecated. It has been superseded by [aioruckus](https://github.com/ms264556/aioruckus), which uses HTTP and supports Python 3.11.
+
 ## Setup
 
 To install the `pyruckus` package:
